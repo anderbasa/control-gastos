@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <meta name="theme-color" content="#f7f7f5" />
+  <title>Gastos</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <link rel="stylesheet" href="css/estilo.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <h1 class="topbar-title">💶 Gastos</h1>
+      <button id="btn-resumen" class="icon-btn" aria-label="Ver resumen mensual">📊</button>
+    </header>
+
+    <div id="aviso-config" class="aviso-config oculto">
+      ⚠️ Firebase no está configurado todavía. Edita <code>js/config.js</code> con las
+      credenciales de tu proyecto (ver README.md).
+    </div>
+
+    <main id="vista-registro" class="vista">
+      <div class="grid-categorias" id="grid-categorias"></div>
+    </main>
+
+    <main id="vista-resumen" class="vista oculto">
+      <div class="resumen-header">
+        <button id="btn-volver" class="icon-btn" aria-label="Volver al registro">←</button>
+        <input type="month" id="selector-mes" />
+      </div>
+
+      <div class="resumen-total">
+        <span class="resumen-total-label">Total del mes</span>
+        <span class="resumen-total-valor" id="total-mes">0,00 €</span>
+      </div>
+
+      <div class="resumen-stats">
+        <div class="stat">
+          <span class="stat-label">Media diaria</span>
+          <span class="stat-valor" id="media-diaria">0,00 €</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Vs. mes anterior</span>
+          <span class="stat-valor" id="comparacion-mes">—</span>
+        </div>
+      </div>
+
+      <div class="resumen-grafico" id="grafico-container"></div>
+      <div class="resumen-desglose" id="desglose-categorias"></div>
+
+      <h2 class="lista-titulo">Movimientos</h2>
+      <div class="lista-gastos" id="lista-gastos"></div>
+    </main>
+  </div>
+
+  <div id="modal-gasto" class="modal oculto">
+    <div class="modal-contenido">
+      <div class="modal-header">
+        <span id="modal-categoria-icono"></span>
+        <span id="modal-categoria-nombre"></span>
+        <button id="btn-cerrar-modal" class="icon-btn" aria-label="Cerrar">✕</button>
+      </div>
+
+      <div class="importe-display">
+        <span id="importe-valor">0</span><span class="importe-moneda">€</span>
+      </div>
+
+      <div class="teclado-numerico" id="teclado"></div>
+
+      <div class="modal-extras">
+        <button id="btn-nota-toggle" class="link-btn">+ añadir nota</button>
+        <input type="text" id="input-nota" class="input-nota oculto" placeholder="Nota (opcional)" maxlength="80" />
+        <button id="btn-fecha-toggle" class="link-btn">+ cambiar fecha</button>
+        <input type="datetime-local" id="input-fecha" class="input-fecha oculto" />
+      </div>
+
+      <div class="modal-acciones">
+        <button id="btn-borrar-gasto" class="btn-borrar oculto">Borrar</button>
+        <button id="btn-guardar" class="btn-guardar">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast oculto"></div>
+
+  <script>
+    window.addEventListener("error", (e) => {
+      console.error(e.error || e.message);
+    });
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("sw.js").catch(() => {});
+      });
+    }
+  </script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
