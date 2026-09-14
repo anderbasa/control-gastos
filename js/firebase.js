@@ -6,6 +6,8 @@ import {
   updateDoc,
   deleteDoc,
   doc,
+  getDoc,
+  setDoc,
   getDocs,
   query,
   where,
@@ -18,6 +20,7 @@ import { FIREBASE_CONFIG } from "./config.js";
 const app = initializeApp(FIREBASE_CONFIG);
 const db = getFirestore(app);
 const gastosRef = collection(db, "gastos");
+const presupuestosRef = doc(db, "config", "presupuestos");
 
 export function estaConfigurado() {
   return !Object.values(FIREBASE_CONFIG).some((v) => String(v).includes("PEGA_AQUI"));
@@ -83,4 +86,15 @@ export async function gastosDelMes(fechaEnMes) {
       fecha: data.fecha ? data.fecha.toDate() : new Date(),
     };
   });
+}
+
+// Presupuestos: un único documento config/presupuestos con { [categoriaId]: limite }.
+// Un límite ausente o 0 significa "sin presupuesto definido" para esa categoría.
+export async function getPresupuestos() {
+  const snap = await conTimeout(getDoc(presupuestosRef));
+  return snap.exists() ? snap.data() : {};
+}
+
+export async function guardarPresupuestos(mapa) {
+  return conTimeout(setDoc(presupuestosRef, mapa, { merge: true }));
 }

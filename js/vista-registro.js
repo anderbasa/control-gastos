@@ -1,6 +1,8 @@
 import { CATEGORIAS, getCategoria } from "./config.js";
 import { crearGasto, actualizarGasto, borrarGasto } from "./firebase.js";
-import { mostrarToast } from "./ui.js";
+import { mostrarToast, svgIcono } from "./ui.js";
+
+const ICONO_BACKSPACE = '<path d="M9 5h11a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H9l-6-7 6-7Z"/><path d="M13 10l4 4M17 10l-4 4"/>';
 
 let estado = null; // { modo: 'crear'|'editar', categoriaId, importeStr, nota, fecha, gastoId }
 let alGuardarCallback = null;
@@ -24,8 +26,8 @@ export function initVistaRegistro() {
   const $grid = document.getElementById("grid-categorias");
   $grid.innerHTML = CATEGORIAS.map(
     (c) => `
-    <button class="chip-categoria" style="--color-cat:${c.color}" data-id="${c.id}">
-      <span class="emoji">${c.emoji}</span>
+    <button class="chip-categoria" data-id="${c.id}">
+      <span class="icono-badge" style="--color-cat:${c.color}">${svgIcono(c.icono, 24)}</span>
       <span class="nombre">${c.nombre}</span>
     </button>`
   ).join("");
@@ -36,9 +38,12 @@ export function initVistaRegistro() {
     abrirModal({ modo: "crear", categoriaId: btn.dataset.id });
   });
 
-  $teclado.innerHTML = TECLAS.map(
-    (t) => `<button class="tecla${t === "⌫" ? " tecla-borrar" : ""}" data-tecla="${t}">${t}</button>`
-  ).join("");
+  $teclado.innerHTML = TECLAS.map((t) => {
+    if (t === "⌫") {
+      return `<button class="tecla tecla-borrar" data-tecla="${t}">${svgIcono(ICONO_BACKSPACE, 20)}</button>`;
+    }
+    return `<button class="tecla" data-tecla="${t}">${t}</button>`;
+  }).join("");
   $teclado.addEventListener("click", (e) => {
     const btn = e.target.closest(".tecla");
     if (!btn) return;
@@ -71,7 +76,10 @@ export function abrirModal({ modo, categoriaId, gasto, onGuardado }) {
   };
   alGuardarCallback = onGuardado || null;
 
-  $modalIcono.textContent = cat.emoji;
+  $modalIcono.innerHTML = svgIcono(cat.icono, 19);
+  $modalIcono.style.setProperty("--color-cat", cat.color);
+  $modalIcono.style.background = `color-mix(in srgb, ${cat.color} 16%, transparent)`;
+  $modalIcono.style.color = cat.color;
   $modalNombre.textContent = cat.nombre;
   $importeValor.textContent = estado.importeStr;
 

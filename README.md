@@ -56,9 +56,15 @@ service cloud.firestore {
       allow read: if true;
       allow delete: if true;
     }
+    match /config/presupuestos {
+      allow read, write: if true;
+    }
   }
 }
 ```
+
+(`config/presupuestos` guarda los límites mensuales que pones en la pantalla de
+presupuestos — un único documento, sin datos sensibles.)
 
 Esto **no requiere login** (nadie te pide contraseña al abrir la web), pero sí
 exige que cualquier escritura tenga la forma de un gasto válido — evita que un
@@ -116,18 +122,33 @@ puedes primero "Añadir a pantalla de inicio" desde el navegador y, si tu
 gestor NFC lo permite, apuntar la etiqueta a esa app instalada en vez de al
 navegador — si no, abrir la URL normal funciona igual de bien.
 
+## Funcionalidades
+
+- **Registro rápido**: categoría + importe con teclado numérico propio, nota y
+  fecha opcionales, en menos de 5 segundos.
+- **Resumen mensual**: total, media diaria, comparación con el mes anterior,
+  donut de desglose por categoría y lista editable de movimientos.
+- **Presupuestos por categoría**: desde el icono ⚙️ del resumen defines un
+  límite mensual por categoría (o lo dejas en blanco para no ponerle límite).
+  Cada categoría con presupuesto muestra una barra de progreso (verde → ámbar
+  a partir del 80% → rojo si te pasas), y si hay al menos un presupuesto
+  definido aparece también una barra global bajo el total del mes.
+- **Exportar a CSV**: el icono ⬇️ del resumen descarga los movimientos del mes
+  visible en un `.csv` listo para abrir en Excel/Sheets.
+
 ## Estructura del proyecto
 
 ```
 index.html              pantalla única (registro + resumen)
-css/estilo.css          estilos mobile-first
-js/config.js            credenciales Firebase + lista de categorías
-js/firebase.js          init Firestore + CRUD de gastos
+css/estilo.css          estilos mobile-first (Plus Jakarta Sans + Space Grotesk)
+js/config.js            credenciales Firebase + categorías (nombre, color, icono SVG)
+js/firebase.js          init Firestore + CRUD de gastos y presupuestos
 js/app.js               router entre vista registro / resumen
 js/vista-registro.js    grid de categorías + modal de importe (crear y editar)
-js/vista-resumen.js     selector de mes, totales, gráfico, lista
-js/graficos.js          donut SVG dibujado a mano
-js/ui.js                toasts y formateo de moneda
+js/vista-resumen.js     selector de mes, totales, presupuestos, gráfico, lista
+js/graficos.js          donut SVG dibujado a mano, con animación de entrada
+js/exportar.js          generación y descarga del CSV mensual
+js/ui.js                toasts, iconos SVG, formateo de moneda y animación de contadores
 manifest.json / sw.js   soporte PWA básico (instalable, funciona offline salvo Firestore)
 ```
 

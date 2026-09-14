@@ -3,24 +3,44 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
-  <meta name="theme-color" content="#f7f7f5" />
+  <meta name="theme-color" content="#0d0e12" />
   <title>Gastos</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" href="icons/icon-192.png" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
+    rel="stylesheet"
+  />
   <link rel="stylesheet" href="css/estilo.css" />
 </head>
 <body>
   <div id="app">
     <header class="topbar">
-      <h1 class="topbar-title">💶 Gastos</h1>
-      <button id="btn-resumen" class="icon-btn" aria-label="Ver resumen mensual">📊</button>
+      <h1 class="topbar-title">
+        <span class="icon-wallet">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="6" width="20" height="14" rx="3.5" />
+            <path d="M2 10.5h20" />
+            <circle cx="17" cy="15" r="1.4" fill="currentColor" stroke="none" />
+          </svg>
+        </span>
+        Gastos
+      </h1>
+      <button id="btn-resumen" class="icon-btn" aria-label="Ver resumen mensual">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 21V13M12 21V7M19 21v-5" />
+          <path d="M3 21h18" />
+        </svg>
+      </button>
     </header>
 
     <div id="aviso-config" class="aviso-config oculto">
-      ⚠️ Firebase no está configurado todavía. Edita <code>js/config.js</code> con las
+      Firebase no está configurado todavía. Edita <code>js/config.js</code> con las
       credenciales de tu proyecto (ver README.md).
     </div>
 
@@ -30,19 +50,44 @@
 
     <main id="vista-resumen" class="vista oculto">
       <div class="resumen-header">
-        <button id="btn-volver" class="icon-btn" aria-label="Volver al registro">←</button>
+        <button id="btn-volver" class="icon-btn" aria-label="Volver al registro">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 5l-7 7 7 7" />
+          </svg>
+        </button>
         <input type="month" id="selector-mes" />
+        <button id="btn-presupuestos" class="icon-btn" aria-label="Editar presupuestos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3.2" />
+            <path
+              d="M19.4 15a7.97 7.97 0 0 0 0-6l2-1.7-2-3.4-2.4 1a8 8 0 0 0-2-1.16L14.6 1h-4l-.4 2.74a8 8 0 0 0-2 1.16l-2.4-1-2 3.4 2 1.7a7.97 7.97 0 0 0 0 6l-2 1.7 2 3.4 2.4-1a8 8 0 0 0 2 1.16L10.6 23h4l.4-2.74a8 8 0 0 0 2-1.16l2.4 1 2-3.4Z"
+            />
+          </svg>
+        </button>
+        <button id="btn-exportar" class="icon-btn" aria-label="Exportar a CSV">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3v12" />
+            <path d="M7 10l5 5 5-5" />
+            <path d="M5 21h14" />
+          </svg>
+        </button>
       </div>
 
       <div class="resumen-total">
         <span class="resumen-total-label">Total del mes</span>
-        <span class="resumen-total-valor" id="total-mes">0,00 €</span>
+        <span class="resumen-total-valor" id="total-mes">0,00&nbsp;€</span>
+        <div class="presupuesto-total oculto" id="presupuesto-total-bar">
+          <div class="barra-progreso">
+            <div class="barra-progreso-relleno" id="presupuesto-total-relleno"></div>
+          </div>
+          <span class="presupuesto-total-texto" id="presupuesto-total-texto"></span>
+        </div>
       </div>
 
       <div class="resumen-stats">
         <div class="stat">
           <span class="stat-label">Media diaria</span>
-          <span class="stat-valor" id="media-diaria">0,00 €</span>
+          <span class="stat-valor" id="media-diaria">0,00&nbsp;€</span>
         </div>
         <div class="stat">
           <span class="stat-label">Vs. mes anterior</span>
@@ -61,9 +106,13 @@
   <div id="modal-gasto" class="modal oculto">
     <div class="modal-contenido">
       <div class="modal-header">
-        <span id="modal-categoria-icono"></span>
+        <span id="modal-categoria-icono" class="modal-categoria-icono"></span>
         <span id="modal-categoria-nombre"></span>
-        <button id="btn-cerrar-modal" class="icon-btn" aria-label="Cerrar">✕</button>
+        <button id="btn-cerrar-modal" class="icon-btn" aria-label="Cerrar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </button>
       </div>
 
       <div class="importe-display">
@@ -82,6 +131,26 @@
       <div class="modal-acciones">
         <button id="btn-borrar-gasto" class="btn-borrar oculto">Borrar</button>
         <button id="btn-guardar" class="btn-guardar">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-presupuestos" class="modal oculto">
+    <div class="modal-contenido">
+      <div class="modal-header">
+        <span>Presupuestos mensuales</span>
+        <button id="btn-cerrar-presupuestos" class="icon-btn" aria-label="Cerrar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </button>
+      </div>
+      <p class="modal-hint">
+        Deja en blanco o en 0 una categoría para no ponerle límite.
+      </p>
+      <div class="lista-presupuestos" id="lista-presupuestos"></div>
+      <div class="modal-acciones">
+        <button id="btn-guardar-presupuestos" class="btn-guardar">Guardar presupuestos</button>
       </div>
     </div>
   </div>
