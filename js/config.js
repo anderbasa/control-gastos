@@ -1,12 +1,12 @@
 // Configuración de Firebase — PEGA AQUÍ tus credenciales
 // (Firebase Console → Configuración del proyecto → Tus apps → Config del SDK)
 export const FIREBASE_CONFIG = {
-  apiKey: "PEGA_AQUI_TU_API_KEY",
-  authDomain: "PEGA_AQUI.firebaseapp.com",
-  projectId: "PEGA_AQUI",
-  storageBucket: "PEGA_AQUI.appspot.com",
-  messagingSenderId: "PEGA_AQUI",
-  appId: "PEGA_AQUI",
+  apiKey: "AIzaSyBffyG7rqw0SpWX1AjOF2DG3rEOyrR7eP8",
+  authDomain: "control-gastos-375d3.firebaseapp.com",
+  projectId: "control-gastos-375d3",
+  storageBucket: "control-gastos-375d3.firebasestorage.app",
+  messagingSenderId: "12867304453",
+  appId: "1:12867304453:web:771a4b6ff5b57cfe84b06c",
 };
 
 // Iconos de línea (paths interiores de un <svg viewBox="0 0 24 24">), sin emoji.
