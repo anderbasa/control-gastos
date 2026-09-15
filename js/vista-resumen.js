@@ -3,7 +3,7 @@ import { gastosDelMes, getPresupuestos, guardarPresupuestos } from "./firebase.j
 import { donutSVG, animarDonut } from "./graficos.js";
 import { formatoEuros, mostrarToast, svgIcono, animarNumero } from "./ui.js";
 import { abrirModal } from "./vista-registro.js";
-import { exportarCSV } from "./exportar.js";
+import { exportarExcel } from "./excel.js";
 
 const $selectorMes = document.getElementById("selector-mes");
 const $totalMes = document.getElementById("total-mes");
@@ -17,7 +17,7 @@ const $presupuestoTotalRelleno = document.getElementById("presupuesto-total-rell
 const $presupuestoTotalTexto = document.getElementById("presupuesto-total-texto");
 
 const $btnPresupuestos = document.getElementById("btn-presupuestos");
-const $btnExportar = document.getElementById("btn-exportar");
+const $btnExportarExcel = document.getElementById("btn-exportar-excel");
 const $modalPresupuestos = document.getElementById("modal-presupuestos");
 const $btnCerrarPresupuestos = document.getElementById("btn-cerrar-presupuestos");
 const $listaPresupuestos = document.getElementById("lista-presupuestos");
@@ -48,7 +48,7 @@ export function initVistaResumen() {
   $btnPresupuestos.addEventListener("click", abrirModalPresupuestos);
   $btnCerrarPresupuestos.addEventListener("click", cerrarModalPresupuestos);
   $btnGuardarPresupuestos.addEventListener("click", onGuardarPresupuestos);
-  $btnExportar.addEventListener("click", onExportar);
+  $btnExportarExcel.addEventListener("click", onExportarExcel);
 }
 
 export async function refrescar() {
@@ -255,10 +255,20 @@ async function onGuardarPresupuestos() {
   }
 }
 
-function onExportar() {
+async function onExportarExcel() {
   if (!gastosActuales.length) {
     mostrarToast("No hay gastos que exportar este mes");
     return;
   }
-  exportarCSV(gastosActuales, `gastos-${$selectorMes.value}.csv`);
+  const mesId = $selectorMes.value || mesActualISO();
+  const nombreMes = parseMes(mesId).toLocaleDateString("es-ES", { month: "long", year: "numeric" });
+  $btnExportarExcel.disabled = true;
+  try {
+    await exportarExcel({ gastos: gastosActuales, nombreMes, mesId });
+  } catch (err) {
+    console.error(err);
+    mostrarToast("Error al exportar: " + err.message);
+  } finally {
+    $btnExportarExcel.disabled = false;
+  }
 }

@@ -133,21 +133,24 @@ navegador — si no, abrir la URL normal funciona igual de bien.
   Cada categoría con presupuesto muestra una barra de progreso (verde → ámbar
   a partir del 80% → rojo si te pasas), y si hay al menos un presupuesto
   definido aparece también una barra global bajo el total del mes.
-- **Exportar a CSV**: el icono ⬇️ del resumen descarga los movimientos del mes
-  visible en un `.csv` listo para abrir en Excel/Sheets.
+- **Exportar a Excel**: el botón "Exportar a Excel" del resumen descarga un
+  `.xlsx` con dos hojas — "Gastos" (todos los movimientos del mes, con
+  cabecera de color, importes en formato moneda y fila de total con fórmula)
+  y "Resumen" (total e importe por categoría con su % del gasto del mes).
 
 ## Estructura del proyecto
 
 ```
-index.html              pantalla única (registro + resumen)
+index.html              pantalla única (registro + resumen) + CDN de ExcelJS
 css/estilo.css          estilos mobile-first (Plus Jakarta Sans + Space Grotesk)
 js/config.js            credenciales Firebase + categorías (nombre, color, icono SVG)
 js/firebase.js          init Firestore + CRUD de gastos y presupuestos
 js/app.js               router entre vista registro / resumen
-js/vista-registro.js    grid de categorías + modal de importe (crear y editar)
+js/vista-registro.js    asistente de registro (importe → categoría) + modal de edición
+js/teclado.js           teclado numérico reutilizado por el registro y la edición
 js/vista-resumen.js     selector de mes, totales, presupuestos, gráfico, lista
 js/graficos.js          donut SVG dibujado a mano, con animación de entrada
-js/exportar.js          generación y descarga del CSV mensual
+js/excel.js             generación del .xlsx (ExcelJS) con hojas Gastos + Resumen
 js/ui.js                toasts, iconos SVG, formateo de moneda y animación de contadores
 manifest.json / sw.js   soporte PWA básico (instalable, funciona offline salvo Firestore)
 ```

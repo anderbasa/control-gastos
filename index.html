@@ -93,13 +93,6 @@
             />
           </svg>
         </button>
-        <button id="btn-exportar" class="icon-btn" aria-label="Exportar a CSV">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 3v12" />
-            <path d="M7 10l5 5 5-5" />
-            <path d="M5 21h14" />
-          </svg>
-        </button>
       </div>
 
       <div class="resumen-total">
@@ -126,6 +119,14 @@
 
       <div class="resumen-grafico" id="grafico-container"></div>
       <div class="resumen-desglose" id="desglose-categorias"></div>
+
+      <button id="btn-exportar-excel" class="btn-exportar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="16" rx="2" />
+          <path d="M3 9h18M3 15h18M9 4v16M15 4v16" />
+        </svg>
+        <span>Exportar a Excel</span>
+      </button>
 
       <h2 class="lista-titulo">Movimientos</h2>
       <div class="lista-gastos" id="lista-gastos"></div>
@@ -196,6 +197,7 @@
       });
     }
   </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
   <script type="module" src="js/app.js"></script>
 </body>
 </html>
