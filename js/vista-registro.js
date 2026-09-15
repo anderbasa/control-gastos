@@ -1,15 +1,28 @@
 import { CATEGORIAS, getCategoria } from "./config.js";
 import { crearGasto, actualizarGasto, borrarGasto } from "./firebase.js";
-import { mostrarToast, svgIcono } from "./ui.js";
+import { mostrarToast, svgIcono, formatoEuros } from "./ui.js";
+import { crearTeclado, parseImporte } from "./teclado.js";
 
-const ICONO_BACKSPACE = '<path d="M9 5h11a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H9l-6-7 6-7Z"/><path d="M13 10l4 4M17 10l-4 4"/>';
+// --- Elementos: paso 1 (importe) ---
+const $pasoImporte = document.getElementById("paso-importe");
+const $importeValorHome = document.getElementById("importe-valor-home");
+const $tecladoHomeEl = document.getElementById("teclado-home");
+const $btnNotaToggleHome = document.getElementById("btn-nota-toggle-home");
+const $inputNotaHome = document.getElementById("input-nota-home");
+const $btnFechaToggleHome = document.getElementById("btn-fecha-toggle-home");
+const $inputFechaHome = document.getElementById("input-fecha-home");
+const $btnSiguiente = document.getElementById("btn-siguiente");
 
-let estado = null; // { modo: 'crear'|'editar', categoriaId, importeStr, nota, fecha, gastoId }
-let alGuardarCallback = null;
+// --- Elementos: paso 2 (categoría) ---
+const $pasoCategoria = document.getElementById("paso-categoria");
+const $pasoCategoriaImporteTexto = document.getElementById("paso-categoria-importe-texto");
+const $btnAtrasCategoria = document.getElementById("btn-atras-categoria");
+const $gridCategorias = document.getElementById("grid-categorias");
 
+// --- Elementos: modal de edición ---
 const $modal = document.getElementById("modal-gasto");
 const $importeValor = document.getElementById("importe-valor");
-const $teclado = document.getElementById("teclado");
+const $tecladoModalEl = document.getElementById("teclado");
 const $modalIcono = document.getElementById("modal-categoria-icono");
 const $modalNombre = document.getElementById("modal-categoria-nombre");
 const $btnCerrar = document.getElementById("btn-cerrar-modal");
@@ -20,11 +33,22 @@ const $inputFecha = document.getElementById("input-fecha");
 const $btnGuardar = document.getElementById("btn-guardar");
 const $btnBorrar = document.getElementById("btn-borrar-gasto");
 
-const TECLAS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ",", "0", "⌫"];
+let tecladoHome;
+let tecladoModal;
+let guardandoRapido = false;
+
+// Estado de edición (modo "editar" desde el resumen)
+let estadoEdicion = null;
+let alGuardarCallback = null;
 
 export function initVistaRegistro() {
-  const $grid = document.getElementById("grid-categorias");
-  $grid.innerHTML = CATEGORIAS.map(
+  tecladoHome = crearTeclado($tecladoHomeEl, $importeValorHome, {
+    onCambio: (valor) => {
+      $btnSiguiente.disabled = valor === "0";
+    },
+  });
+
+  $gridCategorias.innerHTML = CATEGORIAS.map(
     (c) => `
     <button class="chip-categoria" data-id="${c.id}">
       <span class="icono-badge" style="--color-cat:${c.color}">${svgIcono(c.icono, 24)}</span>
@@ -32,23 +56,26 @@ export function initVistaRegistro() {
     </button>`
   ).join("");
 
-  $grid.addEventListener("click", (e) => {
-    const btn = e.target.closest(".chip-categoria");
-    if (!btn) return;
-    abrirModal({ modo: "crear", categoriaId: btn.dataset.id });
+  $btnNotaToggleHome.addEventListener("click", () => {
+    $inputNotaHome.classList.remove("oculto");
+    $btnNotaToggleHome.classList.add("oculto");
+    $inputNotaHome.focus();
+  });
+  $btnFechaToggleHome.addEventListener("click", () => {
+    $inputFechaHome.classList.remove("oculto");
+    $btnFechaToggleHome.classList.add("oculto");
   });
 
-  $teclado.innerHTML = TECLAS.map((t) => {
-    if (t === "⌫") {
-      return `<button class="tecla tecla-borrar" data-tecla="${t}">${svgIcono(ICONO_BACKSPACE, 20)}</button>`;
-    }
-    return `<button class="tecla" data-tecla="${t}">${t}</button>`;
-  }).join("");
-  $teclado.addEventListener("click", (e) => {
-    const btn = e.target.closest(".tecla");
+  $btnSiguiente.addEventListener("click", irAPasoCategoria);
+  $btnAtrasCategoria.addEventListener("click", volverAPasoImporte);
+  $gridCategorias.addEventListener("click", (e) => {
+    const btn = e.target.closest(".chip-categoria");
     if (!btn) return;
-    onTecla(btn.dataset.tecla);
+    onCategoriaElegida(btn.dataset.id);
   });
+
+  // --- Modal de edición ---
+  tecladoModal = crearTeclado($tecladoModalEl, $importeValor);
 
   $btnCerrar.addEventListener("click", cerrarModal);
   $btnNotaToggle.addEventListener("click", () => {
@@ -60,66 +87,90 @@ export function initVistaRegistro() {
     $inputFecha.classList.toggle("oculto");
     $btnFechaToggle.classList.add("oculto");
   });
-  $btnGuardar.addEventListener("click", onGuardar);
+  $btnGuardar.addEventListener("click", onGuardarEdicion);
   $btnBorrar.addEventListener("click", onBorrar);
+
+  resetPasoImporte();
 }
 
-export function abrirModal({ modo, categoriaId, gasto, onGuardado }) {
+function irAPasoCategoria() {
+  const importe = parseImporte(tecladoHome.valor);
+  if (!importe || importe <= 0) {
+    mostrarToast("Introduce un importe válido");
+    return;
+  }
+  $pasoCategoriaImporteTexto.textContent = formatoEuros(importe);
+  $pasoImporte.classList.add("oculto");
+  $pasoCategoria.classList.remove("oculto");
+}
+
+function volverAPasoImporte() {
+  $pasoCategoria.classList.add("oculto");
+  $pasoImporte.classList.remove("oculto");
+}
+
+function resetPasoImporte() {
+  tecladoHome.valor = "0";
+  $btnSiguiente.disabled = true;
+  $inputNotaHome.value = "";
+  $inputNotaHome.classList.add("oculto");
+  $btnNotaToggleHome.classList.remove("oculto");
+  $inputFechaHome.classList.add("oculto");
+  $btnFechaToggleHome.classList.remove("oculto");
+  $pasoCategoria.classList.add("oculto");
+  $pasoImporte.classList.remove("oculto");
+}
+
+async function onCategoriaElegida(categoriaId) {
+  if (guardandoRapido) return;
+  const importe = parseImporte(tecladoHome.valor);
+  const nota = $inputNotaHome.value.trim();
+  const fecha = $inputFechaHome.classList.contains("oculto") ? null : new Date($inputFechaHome.value);
+
+  guardandoRapido = true;
+  try {
+    await crearGasto({ importe, categoria: categoriaId, nota, fecha });
+    mostrarToast("Gasto guardado");
+    resetPasoImporte();
+  } catch (err) {
+    console.error(err);
+    mostrarToast("Error al guardar: " + err.message);
+  } finally {
+    guardandoRapido = false;
+  }
+}
+
+// --- Edición desde el resumen mensual ---
+
+export function abrirModal({ categoriaId, gasto, onGuardado }) {
   const cat = getCategoria(categoriaId);
-  estado = {
-    modo,
-    categoriaId,
-    importeStr: gasto ? String(gasto.importe).replace(".", ",") : "0",
-    nota: gasto ? gasto.nota : "",
-    fecha: gasto ? gasto.fecha : null,
-    gastoId: gasto ? gasto.id : null,
-  };
+  estadoEdicion = { categoriaId, gastoId: gasto.id, fecha: gasto.fecha };
   alGuardarCallback = onGuardado || null;
 
+  tecladoModal.valor = String(gasto.importe).replace(".", ",");
+
   $modalIcono.innerHTML = svgIcono(cat.icono, 19);
-  $modalIcono.style.setProperty("--color-cat", cat.color);
   $modalIcono.style.background = `color-mix(in srgb, ${cat.color} 16%, transparent)`;
   $modalIcono.style.color = cat.color;
   $modalNombre.textContent = cat.nombre;
-  $importeValor.textContent = estado.importeStr;
 
-  $inputNota.value = estado.nota || "";
-  $inputNota.classList.toggle("oculto", !estado.nota);
-  $btnNotaToggle.classList.toggle("oculto", !!estado.nota);
+  $inputNota.value = gasto.nota || "";
+  $inputNota.classList.toggle("oculto", !gasto.nota);
+  $btnNotaToggle.classList.toggle("oculto", !!gasto.nota);
 
-  const fechaBase = estado.fecha || new Date();
-  $inputFecha.value = toDatetimeLocalValue(fechaBase);
-  const mostrarFecha = modo === "editar";
-  $inputFecha.classList.toggle("oculto", !mostrarFecha);
-  $btnFechaToggle.classList.toggle("oculto", mostrarFecha);
+  $inputFecha.value = toDatetimeLocalValue(gasto.fecha);
+  $inputFecha.classList.remove("oculto");
+  $btnFechaToggle.classList.add("oculto");
 
-  $btnBorrar.classList.toggle("oculto", modo !== "editar");
+  $btnBorrar.classList.remove("oculto");
 
   $modal.classList.remove("oculto");
 }
 
 function cerrarModal() {
   $modal.classList.add("oculto");
-  estado = null;
+  estadoEdicion = null;
   alGuardarCallback = null;
-}
-
-function onTecla(t) {
-  if (!estado) return;
-  if (t === "⌫") {
-    estado.importeStr = estado.importeStr.length > 1 ? estado.importeStr.slice(0, -1) : "0";
-  } else if (t === ",") {
-    if (!estado.importeStr.includes(",")) estado.importeStr += ",";
-  } else {
-    if (estado.importeStr === "0") estado.importeStr = t;
-    else if (estado.importeStr.split(",")[1]?.length >= 2) return;
-    else estado.importeStr += t;
-  }
-  $importeValor.textContent = estado.importeStr;
-}
-
-function parseImporte(str) {
-  return parseFloat(str.replace(",", "."));
 }
 
 function toDatetimeLocalValue(date) {
@@ -129,8 +180,8 @@ function toDatetimeLocalValue(date) {
   )}:${pad(date.getMinutes())}`;
 }
 
-async function onGuardar() {
-  const importe = parseImporte(estado.importeStr);
+async function onGuardarEdicion() {
+  const importe = parseImporte(tecladoModal.valor);
   if (!importe || importe <= 0) {
     mostrarToast("Introduce un importe válido");
     return;
@@ -139,22 +190,14 @@ async function onGuardar() {
   $btnGuardar.textContent = "Guardando...";
   try {
     const nota = $inputNota.value.trim();
-    const fecha = $inputFecha.classList.contains("oculto")
-      ? null
-      : new Date($inputFecha.value);
-
-    if (estado.modo === "crear") {
-      await crearGasto({ importe, categoria: estado.categoriaId, nota, fecha });
-      mostrarToast("Gasto guardado");
-    } else {
-      await actualizarGasto(estado.gastoId, {
-        importe,
-        categoria: estado.categoriaId,
-        nota,
-        fecha: fecha || estado.fecha,
-      });
-      mostrarToast("Gasto actualizado");
-    }
+    const fecha = new Date($inputFecha.value);
+    await actualizarGasto(estadoEdicion.gastoId, {
+      importe,
+      categoria: estadoEdicion.categoriaId,
+      nota,
+      fecha,
+    });
+    mostrarToast("Gasto actualizado");
     const cb = alGuardarCallback;
     cerrarModal();
     if (cb) cb();
@@ -168,10 +211,10 @@ async function onGuardar() {
 }
 
 async function onBorrar() {
-  if (!estado || estado.modo !== "editar") return;
+  if (!estadoEdicion) return;
   if (!confirm("¿Borrar este gasto?")) return;
   try {
-    await borrarGasto(estado.gastoId);
+    await borrarGasto(estadoEdicion.gastoId);
     mostrarToast("Gasto borrado");
     const cb = alGuardarCallback;
     cerrarModal();

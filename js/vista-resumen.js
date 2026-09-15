@@ -177,7 +177,6 @@ function renderLista(gastos) {
       const gasto = gastos.find((g) => g.id === fila.dataset.id);
       if (!gasto) return;
       abrirModal({
-        modo: "editar",
         categoriaId: gasto.categoria,
         gasto,
         onGuardado: refrescar,

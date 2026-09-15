@@ -45,7 +45,36 @@
     </div>
 
     <main id="vista-registro" class="vista">
-      <div class="grid-categorias" id="grid-categorias"></div>
+      <div id="paso-importe" class="paso-importe">
+        <p class="paso-titulo">¿Cuánto has gastado?</p>
+        <div class="importe-display">
+          <span id="importe-valor-home">0</span><span class="importe-moneda">€</span>
+        </div>
+
+        <div class="teclado-numerico" id="teclado-home"></div>
+
+        <div class="modal-extras">
+          <button id="btn-nota-toggle-home" class="link-btn">+ añadir nota</button>
+          <input type="text" id="input-nota-home" class="input-nota oculto" placeholder="Nota (opcional)" maxlength="80" />
+          <button id="btn-fecha-toggle-home" class="link-btn">+ cambiar fecha</button>
+          <input type="datetime-local" id="input-fecha-home" class="input-fecha oculto" />
+        </div>
+
+        <button id="btn-siguiente" class="btn-guardar" disabled>Siguiente</button>
+      </div>
+
+      <div id="paso-categoria" class="paso-categoria oculto">
+        <div class="paso-categoria-header">
+          <button id="btn-atras-categoria" class="icon-btn" aria-label="Volver al importe">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 5l-7 7 7 7" />
+            </svg>
+          </button>
+          <span class="paso-categoria-importe" id="paso-categoria-importe-texto"></span>
+        </div>
+        <p class="paso-titulo">¿En qué categoría?</p>
+        <div class="grid-categorias" id="grid-categorias"></div>
+      </div>
     </main>
 
     <main id="vista-resumen" class="vista oculto">

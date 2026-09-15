@@ -1,4 +1,4 @@
-const CACHE = "gastos-v2";
+const CACHE = "gastos-v3";
 const ARCHIVOS = [
   "./",
   "./index.html",
@@ -8,6 +8,7 @@ const ARCHIVOS = [
   "./js/firebase.js",
   "./js/graficos.js",
   "./js/exportar.js",
+  "./js/teclado.js",
   "./js/ui.js",
   "./js/vista-registro.js",
   "./js/vista-resumen.js",
