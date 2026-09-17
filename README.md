@@ -133,10 +133,14 @@ navegador — si no, abrir la URL normal funciona igual de bien.
   Cada categoría con presupuesto muestra una barra de progreso (verde → ámbar
   a partir del 80% → rojo si te pasas), y si hay al menos un presupuesto
   definido aparece también una barra global bajo el total del mes.
-- **Exportar a Excel**: el botón "Exportar a Excel" del resumen descarga un
-  `.xlsx` con dos hojas — "Gastos" (todos los movimientos del mes, con
-  cabecera de color, importes en formato moneda y fila de total con fórmula)
-  y "Resumen" (total e importe por categoría con su % del gasto del mes).
+- **Exportar a Excel (informe completo)**: el botón "Exportar a Excel" del
+  resumen descarga un `.xlsx` con tres hojas — "Informe" (portada con el
+  total, la media diaria y la comparación con el mes anterior, más un donut
+  por categoría y un gráfico de barras del gasto día a día, ambos incrustados
+  como imágenes), "Gastos" (todos los movimientos, con cabecera de color,
+  importes en formato moneda, autofiltro, barras de datos nativas de Excel
+  y fila de total con fórmula) y "Resumen" (importe y % por categoría, también
+  con barras de datos).
 
 ## Estructura del proyecto
 
@@ -150,7 +154,8 @@ js/vista-registro.js    asistente de registro (importe → categoría) + modal d
 js/teclado.js           teclado numérico reutilizado por el registro y la edición
 js/vista-resumen.js     selector de mes, totales, presupuestos, gráfico, lista
 js/graficos.js          donut SVG dibujado a mano, con animación de entrada
-js/excel.js             generación del .xlsx (ExcelJS) con hojas Gastos + Resumen
+js/excel.js             generación del .xlsx (ExcelJS): hojas Informe, Gastos y Resumen
+js/graficos-informe.js  gráficas (donut + barras por día) dibujadas en canvas y exportadas como PNG
 js/ui.js                toasts, iconos SVG, formateo de moneda y animación de contadores
 manifest.json / sw.js   soporte PWA básico (instalable, funciona offline salvo Firestore)
 ```

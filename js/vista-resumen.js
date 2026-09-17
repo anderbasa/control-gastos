@@ -25,6 +25,7 @@ const $btnGuardarPresupuestos = document.getElementById("btn-guardar-presupuesto
 
 let gastosActuales = [];
 let presupuestosActuales = {};
+let statsActuales = { total: 0, mediaDiaria: 0, diasDelMes: 30, comparacionTexto: "—" };
 
 function mesActualISO() {
   const d = new Date();
@@ -73,9 +74,12 @@ export async function refrescar() {
   const esMesActual = mesDate.getFullYear() === hoy.getFullYear() && mesDate.getMonth() === hoy.getMonth();
   const diasDelMes = new Date(mesDate.getFullYear(), mesDate.getMonth() + 1, 0).getDate();
   const diasTranscurridos = esMesActual ? hoy.getDate() : diasDelMes;
-  $mediaDiaria.textContent = formatoEuros(diasTranscurridos > 0 ? total / diasTranscurridos : 0);
+  const mediaDiariaValor = diasTranscurridos > 0 ? total / diasTranscurridos : 0;
+  $mediaDiaria.textContent = formatoEuros(mediaDiariaValor);
 
-  await actualizarComparacion(mesDate, total);
+  const comparacionTexto = await actualizarComparacion(mesDate, total);
+
+  statsActuales = { total, mediaDiaria: mediaDiariaValor, diasDelMes, comparacionTexto };
 
   const porCategoria = CATEGORIAS.map((c) => ({
     ...c,
@@ -192,20 +196,23 @@ async function actualizarComparacion(mesDate, totalActual) {
     gastosAnterior = await gastosDelMes(mesAnteriorDate);
   } catch (err) {
     $comparacionMes.textContent = "—";
-    return;
+    return "—";
   }
   const totalAnterior = gastosAnterior.reduce((sum, g) => sum + g.importe, 0);
 
   $comparacionMes.classList.remove("subida", "bajada");
   if (totalAnterior === 0) {
-    $comparacionMes.textContent = totalActual > 0 ? "Mes nuevo" : "—";
-    return;
+    const texto = totalActual > 0 ? "Mes nuevo" : "—";
+    $comparacionMes.textContent = texto;
+    return texto;
   }
   const diff = totalActual - totalAnterior;
   const pct = Math.round((diff / totalAnterior) * 100);
   const signo = diff >= 0 ? "+" : "";
-  $comparacionMes.textContent = `${signo}${pct}% (${signo}${formatoEuros(diff)})`;
+  const texto = `${signo}${pct}% (${signo}${formatoEuros(diff)})`;
+  $comparacionMes.textContent = texto;
   $comparacionMes.classList.add(diff > 0 ? "subida" : "bajada");
+  return texto;
 }
 
 function abrirModalPresupuestos() {
@@ -263,12 +270,14 @@ async function onExportarExcel() {
   const mesId = $selectorMes.value || mesActualISO();
   const nombreMes = parseMes(mesId).toLocaleDateString("es-ES", { month: "long", year: "numeric" });
   $btnExportarExcel.disabled = true;
+  $btnExportarExcel.querySelector("span").textContent = "Generando...";
   try {
-    await exportarExcel({ gastos: gastosActuales, nombreMes, mesId });
+    await exportarExcel({ gastos: gastosActuales, nombreMes, mesId, stats: statsActuales });
   } catch (err) {
     console.error(err);
     mostrarToast("Error al exportar: " + err.message);
   } finally {
     $btnExportarExcel.disabled = false;
+    $btnExportarExcel.querySelector("span").textContent = "Exportar a Excel";
   }
 }
