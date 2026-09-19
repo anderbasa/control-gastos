@@ -44,6 +44,14 @@
       credenciales de tu proyecto (ver README.md).
     </div>
 
+    <div id="aviso-copia" class="aviso-copia oculto" role="status">
+      <p class="aviso-copia-texto" id="aviso-copia-texto"></p>
+      <div class="aviso-copia-botones">
+        <button id="btn-aviso-copia" class="aviso-copia-btn principal">Hacer copia ahora</button>
+        <button id="btn-aviso-luego" class="aviso-copia-btn">Más tarde</button>
+      </div>
+    </div>
+
     <main id="vista-registro" class="vista">
       <div id="paso-importe" class="paso-importe">
         <p class="paso-titulo">¿Cuánto has gastado?</p>
@@ -114,6 +122,7 @@
         <div class="stat">
           <span class="stat-label">Vs. mes anterior</span>
           <span class="stat-valor" id="comparacion-mes">—</span>
+          <span class="stat-nota oculto" id="comparacion-nota"></span>
         </div>
       </div>
 
@@ -157,8 +166,9 @@
       <section class="copia" id="copia-seguridad">
         <h2 class="lista-titulo">Copia de seguridad</h2>
         <p class="copia-texto">
-          Descarga todos tus gastos y presupuestos en un archivo. Al restaurar, se añaden los que
-          falten y se actualizan los que coincidan; nunca se borra nada.
+          Descarga todos tus gastos y presupuestos en un archivo y guárdalo fuera del móvil (Drive,
+          iCloud, correo…). Al restaurar, se añaden los que falten y se actualizan los que coincidan;
+          nunca se borra nada.
         </p>
         <p class="copia-ultima" id="copia-ultima"></p>
         <div class="copia-botones">

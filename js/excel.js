@@ -81,7 +81,7 @@ export async function exportarExcel({ gastos, nombreMes, mesId, stats = {} }) {
   informe.getCell("E3").numFmt = FORMATO_MONEDA;
   informe.getCell("E3").font = { bold: true, size: 13 };
 
-  informe.getCell("F3").value = "Vs. mes anterior";
+  informe.getCell("F3").value = stats.comparacionEtiqueta || "Vs. mes anterior";
   informe.getCell("F3").font = { size: 11, color: { argb: COLOR_SUAVE } };
   informe.getCell("G3").value = stats.comparacionTexto || "—";
   informe.getCell("G3").font = { bold: true, size: 13 };

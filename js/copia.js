@@ -4,8 +4,16 @@ import { mostrarToast } from "./ui.js";
 const VERSION_COPIA = 1;
 const MAX_BYTES = 5 * 1024 * 1024;
 const CLAVE_ULTIMA_COPIA = "gastos.ultimaCopia";
+const CLAVE_POSPUESTO = "gastos.avisoCopiaPospuestoHasta";
+const DIAS_HASTA_AVISO = 30;
+const DIAS_AL_POSPONER = 7;
 const ID_VALIDO = /^[A-Za-z0-9_-]{1,100}$/;
+const DIA_MS = 86400000;
 
+const $avisoCopia = document.getElementById("aviso-copia");
+const $avisoTexto = document.getElementById("aviso-copia-texto");
+const $btnAvisoCopia = document.getElementById("btn-aviso-copia");
+const $btnAvisoLuego = document.getElementById("btn-aviso-luego");
 const $btnDescargar = document.getElementById("btn-descargar-copia");
 const $btnRestaurar = document.getElementById("btn-restaurar-copia");
 const $inputCopia = document.getElementById("input-copia");
@@ -19,20 +27,35 @@ let copiaPendiente = null;
 
 const plural = (n, uno, varios) => `${n} ${n === 1 ? uno : varios}`;
 
-function leerUltimaCopia() {
+function leerLocal(clave) {
   try {
-    return localStorage.getItem(CLAVE_ULTIMA_COPIA);
+    return localStorage.getItem(clave);
   } catch {
     return null;
   }
 }
 
-function guardarUltimaCopia() {
+function guardarLocal(clave, valor) {
   try {
-    localStorage.setItem(CLAVE_ULTIMA_COPIA, new Date().toISOString());
+    localStorage.setItem(clave, valor);
+    return true;
   } catch {
-    // sin localStorage solo se pierde el recordatorio
+    return false;
   }
+}
+
+function almacenamientoDisponible() {
+  try {
+    localStorage.setItem("gastos.prueba", "1");
+    localStorage.removeItem("gastos.prueba");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function leerUltimaCopia() {
+  return leerLocal(CLAVE_ULTIMA_COPIA);
 }
 
 function pintarUltimaCopia() {
@@ -41,9 +64,36 @@ function pintarUltimaCopia() {
     $ultima.textContent = "Aún no has descargado ninguna copia desde este dispositivo.";
     return;
   }
-  const dias = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+  const dias = Math.floor((Date.now() - new Date(iso).getTime()) / DIA_MS);
   const cuando = dias <= 0 ? "hoy" : dias === 1 ? "ayer" : `hace ${dias} días`;
   $ultima.textContent = `Última copia descargada: ${cuando}.`;
+}
+
+// Decide si toca avisar de que falta una copia: nunca se ha descargado ninguna (desde este
+// dispositivo) o la última tiene DIAS_HASTA_AVISO días o más. Si el aviso se ha pospuesto, no.
+export function necesitaAviso({ ultimaCopia, pospuestoHasta, ahora = Date.now() }) {
+  if (pospuestoHasta && ahora < new Date(pospuestoHasta).getTime()) return { mostrar: false };
+  if (!ultimaCopia) {
+    return { mostrar: true, texto: "Aún no has hecho ninguna copia de seguridad de tus gastos desde este dispositivo." };
+  }
+  const dias = Math.floor((ahora - new Date(ultimaCopia).getTime()) / DIA_MS);
+  if (dias < DIAS_HASTA_AVISO) return { mostrar: false };
+  return { mostrar: true, texto: `Tu última copia de seguridad es de hace ${dias} días.` };
+}
+
+function evaluarAviso() {
+  // Sin localStorage no se podría recordar ni la copia ni el "más tarde": mejor no avisar nunca que avisar siempre.
+  const disponible = almacenamientoDisponible();
+  const aviso = disponible
+    ? necesitaAviso({ ultimaCopia: leerUltimaCopia(), pospuestoHasta: leerLocal(CLAVE_POSPUESTO) })
+    : { mostrar: false };
+  $avisoCopia.classList.toggle("oculto", !aviso.mostrar);
+  if (aviso.mostrar) $avisoTexto.textContent = aviso.texto;
+}
+
+function posponerAviso() {
+  guardarLocal(CLAVE_POSPUESTO, new Date(Date.now() + DIAS_AL_POSPONER * DIA_MS).toISOString());
+  evaluarAviso();
 }
 
 function descargarArchivo(nombre, texto) {
@@ -60,6 +110,7 @@ function descargarArchivo(nombre, texto) {
 
 async function onDescargar() {
   $btnDescargar.disabled = true;
+  $btnAvisoCopia.disabled = true;
   try {
     const [gastos, presupuestos] = await Promise.all([todosLosGastos(), getPresupuestos()]);
     const copia = {
@@ -75,16 +126,19 @@ async function onDescargar() {
       })),
       presupuestos,
     };
-    const dia = new Date().toISOString().slice(0, 10);
+    const hoy = new Date();
+    const dia = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}-${String(hoy.getDate()).padStart(2, "0")}`;
     descargarArchivo(`control-gastos-copia-${dia}.json`, JSON.stringify(copia, null, 2));
-    guardarUltimaCopia();
+    guardarLocal(CLAVE_ULTIMA_COPIA, new Date().toISOString());
     pintarUltimaCopia();
+    evaluarAviso();
     mostrarToast(`Copia descargada (${plural(gastos.length, "gasto", "gastos")})`);
   } catch (err) {
     console.error(err);
     mostrarToast("No se pudo crear la copia: " + err.message);
   } finally {
     $btnDescargar.disabled = false;
+    $btnAvisoCopia.disabled = false;
   }
 }
 
@@ -194,7 +248,10 @@ async function onConfirmarRestaurar() {
 
 export function initCopia() {
   pintarUltimaCopia();
+  evaluarAviso();
   $btnDescargar.addEventListener("click", onDescargar);
+  $btnAvisoCopia.addEventListener("click", onDescargar);
+  $btnAvisoLuego.addEventListener("click", posponerAviso);
   $btnRestaurar.addEventListener("click", () => $inputCopia.click());
   $inputCopia.addEventListener("change", onArchivoElegido);
   $btnConfirmar.addEventListener("click", onConfirmarRestaurar);

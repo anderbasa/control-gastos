@@ -9,6 +9,7 @@ const $selectorMes = document.getElementById("selector-mes");
 const $totalMes = document.getElementById("total-mes");
 const $mediaDiaria = document.getElementById("media-diaria");
 const $comparacionMes = document.getElementById("comparacion-mes");
+const $comparacionNota = document.getElementById("comparacion-nota");
 const $graficoContainer = document.getElementById("grafico-container");
 const $desglose = document.getElementById("desglose-categorias");
 const $lista = document.getElementById("lista-gastos");
@@ -36,9 +37,10 @@ const MESES_TENDENCIA = 6;
 
 let gastosActuales = [];
 let presupuestosActuales = {};
-let statsActuales = { total: 0, mediaDiaria: 0, diasDelMes: 30, comparacionTexto: "—" };
-// Totales por categoría del mes anterior; null si no se pudieron cargar o ese mes no tiene gastos.
+let statsActuales = { total: 0, mediaDiaria: 0, diasDelMes: 30, comparacionTexto: "—", comparacionEtiqueta: "Vs. mes anterior" };
+// Totales por categoría del periodo con el que se compara; null si ese periodo no tiene gastos.
 let totalesAnteriores = null;
+let etiquetaComparacion = "mes anterior";
 
 function normalizar(texto) {
   return texto.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -88,6 +90,21 @@ function claveMes(fecha) {
   return `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, "0")}`;
 }
 
+// Con qué se compara un mes. Si está en curso, con el mismo tramo del mes anterior (del 1 al día de
+// hoy, sin pasarse de los días que tuvo ese mes): comparar lo que llevas con un mes entero siempre
+// saldría "a la baja". Si ya terminó, con el mes anterior completo.
+export function rangoComparable(mesDate, hoy = new Date()) {
+  const enCurso = mesDate.getFullYear() === hoy.getFullYear() && mesDate.getMonth() === hoy.getMonth();
+  if (!enCurso) return { enCurso: false, diaLimite: null, etiqueta: "mes anterior" };
+  const nombreMesAnterior = new Date(mesDate.getFullYear(), mesDate.getMonth() - 1, 1)
+    .toLocaleDateString("es-ES", { month: "short" })
+    .replace(".", "");
+  const diasMesAnterior = new Date(mesDate.getFullYear(), mesDate.getMonth(), 0).getDate();
+  const diaLimite = Math.min(hoy.getDate(), diasMesAnterior);
+  const tramo = diaLimite === 1 ? "1" : `1–${diaLimite}`;
+  return { enCurso: true, diaLimite, etiqueta: `${tramo} ${nombreMesAnterior}` };
+}
+
 export async function refrescar() {
   const mesDate = parseMes($selectorMes.value || mesActualISO());
   const mesSiguiente = new Date(mesDate.getFullYear(), mesDate.getMonth() + 1, 1);
@@ -114,17 +131,31 @@ export async function refrescar() {
   animarNumero($totalMes, total);
 
   const hoy = new Date();
-  const esMesActual = mesDate.getFullYear() === hoy.getFullYear() && mesDate.getMonth() === hoy.getMonth();
+  const rango = rangoComparable(mesDate, hoy);
   const diasDelMes = new Date(mesDate.getFullYear(), mesDate.getMonth() + 1, 0).getDate();
-  const diasTranscurridos = esMesActual ? hoy.getDate() : diasDelMes;
+  const diasTranscurridos = rango.enCurso ? hoy.getDate() : diasDelMes;
   const mediaDiariaValor = diasTranscurridos > 0 ? total / diasTranscurridos : 0;
   $mediaDiaria.textContent = formatoEuros(mediaDiariaValor);
 
-  const comparacion = actualizarComparacion(gastosAnterior, total);
-  const comparacionTexto = comparacion.texto;
+  const anteriorComparable = rango.diaLimite
+    ? gastosAnterior.filter((g) => g.fecha.getDate() <= rango.diaLimite)
+    : gastosAnterior;
+  const comparacion = actualizarComparacion({
+    hayHistorial: gastosAnterior.length > 0,
+    anteriorComparable,
+    totalActual: total,
+    rango,
+  });
   totalesAnteriores = comparacion.totalesPorCategoria;
+  etiquetaComparacion = rango.etiqueta;
 
-  statsActuales = { total, mediaDiaria: mediaDiariaValor, diasDelMes, comparacionTexto };
+  statsActuales = {
+    total,
+    mediaDiaria: mediaDiariaValor,
+    diasDelMes,
+    comparacionTexto: comparacion.texto,
+    comparacionEtiqueta: rango.enCurso ? `Vs. ${rango.etiqueta}` : "Vs. mes anterior",
+  };
 
   renderTendencia(ventana, mesDate);
 
@@ -204,17 +235,20 @@ function actualizarPresupuestoTotal(presupuestos, porCategoria) {
   $presupuestoTotalTexto.textContent = `${formatoEuros(total)} de ${formatoEuros(limiteTotal)} presupuestados`;
 }
 
-// Cambio de una categoría respecto al mes anterior. Sin datos del mes anterior no se muestra nada,
-// para no llenar todas las filas de "nuevo" cuando aún no hay historial.
+// Cambio de una categoría respecto al periodo de comparación. Sin datos en ese periodo no se
+// muestra nada, para no llenar todas las filas de "nuevo" cuando aún no hay historial.
 function deltaCategoriaHtml(categoriaId, valorActual) {
   if (!totalesAnteriores) return "";
   const anterior = totalesAnteriores[categoriaId] || 0;
-  if (anterior === 0) return `<span class="desglose-delta">nuevo este mes</span>`;
+  if (anterior === 0) {
+    const texto = etiquetaComparacion === "mes anterior" ? "nuevo este mes" : `sin gasto en ${etiquetaComparacion}`;
+    return `<span class="desglose-delta">${escaparHtml(texto)}</span>`;
+  }
   const pct = Math.round(((valorActual - anterior) / anterior) * 100);
-  if (pct === 0) return `<span class="desglose-delta">igual que el mes anterior</span>`;
+  if (pct === 0) return `<span class="desglose-delta">sin cambios vs. ${escaparHtml(etiquetaComparacion)}</span>`;
   const clase = pct > 0 ? "subida" : "bajada";
   const flecha = pct > 0 ? "↑" : "↓";
-  return `<span class="desglose-delta ${clase}">${flecha} ${Math.abs(pct)}% vs. mes anterior</span>`;
+  return `<span class="desglose-delta ${clase}">${flecha} ${Math.abs(pct)}% vs. ${escaparHtml(etiquetaComparacion)}</span>`;
 }
 
 function aplicarFiltros(gastos) {
@@ -346,18 +380,22 @@ function renderTendencia(ventana, mesElegido) {
   });
 }
 
-function actualizarComparacion(gastosAnterior, totalActual) {
-  const totalAnterior = gastosAnterior.reduce((sum, g) => sum + g.importe, 0);
+// Compara el mes con `anteriorComparable` (el mes anterior entero, o su mismo tramo si el mes está en
+// curso; ver rangoComparable) y pinta el resultado en la tarjeta. `hayHistorial` dice si el mes
+// anterior tiene algún gasto, para distinguir "mes nuevo" de "no gasté nada en ese tramo".
+function actualizarComparacion({ hayHistorial, anteriorComparable, totalActual, rango }) {
+  const totalAnterior = anteriorComparable.reduce((sum, g) => sum + g.importe, 0);
 
   $comparacionMes.classList.remove("subida", "bajada");
+  $comparacionNota.classList.add("oculto");
   if (totalAnterior === 0) {
-    const texto = totalActual > 0 ? "Mes nuevo" : "—";
+    const texto = totalActual === 0 ? "—" : hayHistorial ? `Sin gasto en ${rango.etiqueta}` : "Mes nuevo";
     $comparacionMes.textContent = texto;
     return { texto, totalesPorCategoria: null };
   }
 
   const totalesPorCategoria = {};
-  gastosAnterior.forEach((g) => {
+  anteriorComparable.forEach((g) => {
     totalesPorCategoria[g.categoria] = (totalesPorCategoria[g.categoria] || 0) + g.importe;
   });
 
@@ -367,6 +405,12 @@ function actualizarComparacion(gastosAnterior, totalActual) {
   const texto = `${signo}${pct}% (${signo}${formatoEuros(diff)})`;
   $comparacionMes.textContent = texto;
   $comparacionMes.classList.add(diff > 0 ? "subida" : "bajada");
+
+  // Se enseña con qué se ha comparado para que el porcentaje no parezca salir de la nada.
+  if (rango.enCurso) {
+    $comparacionNota.textContent = `${rango.etiqueta}: ${formatoEuros(totalAnterior)}`;
+    $comparacionNota.classList.remove("oculto");
+  }
   return { texto, totalesPorCategoria };
 }
 

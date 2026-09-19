@@ -136,8 +136,17 @@ navegador — si no, abrir la URL normal funciona igual de bien.
   por id, así que repetirlo no duplica nada. Se muestra un resumen antes de
   aplicarla y se descartan las entradas que no cumplan las reglas de la base
   de datos.
+- **Comparación justa con el mes anterior**: mientras el mes está en curso se
+  compara con el mismo tramo del mes anterior (p. ej. 1–20 sept contra 1–20
+  ago), no con el mes entero, y la tarjeta enseña con qué importe se ha
+  comparado. Los meses ya terminados se comparan enteros.
 - **Cambio por categoría**: cada categoría del desglose indica si has gastado
-  más o menos que el mes anterior (↑ / ↓ %), o si es nueva este mes.
+  más o menos que en ese mismo periodo de comparación (↑ / ↓ %), o si no
+  gastaste nada en él.
+- **Aviso de copia de seguridad**: si nunca has descargado una copia desde el
+  dispositivo, o la última tiene 30 días o más, aparece un aviso arriba con
+  "Hacer copia ahora" (descarga directa) y "Más tarde" (lo oculta 7 días). El
+  recordatorio se guarda en el propio dispositivo, así que es por móvil.
 - **Buscar, filtrar y ordenar movimientos**: en el resumen puedes buscar por
   nota o categoría (sin distinguir mayúsculas ni tildes), filtrar por categoría
   y ordenar por fecha o importe; al filtrar ves cuántos movimientos son y su suma.

@@ -1,4 +1,4 @@
-const CACHE = "gastos-v7";
+const CACHE = "gastos-v8";
 const ARCHIVOS = [
   "./",
   "./index.html",

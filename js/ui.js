@@ -17,7 +17,7 @@ export function escaparHtml(texto) {
 }
 
 export function formatoEuros(valor) {
-  return valor.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
+  return valor.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
 }
 
 // Icono de línea a partir de los <path> de config.js.
