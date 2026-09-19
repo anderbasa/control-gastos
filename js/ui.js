@@ -12,6 +12,10 @@ export function mostrarToast(mensaje, duracion = 2600) {
   }, duracion);
 }
 
+export function escaparHtml(texto) {
+  return String(texto).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+}
+
 export function formatoEuros(valor) {
   return valor.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
 }

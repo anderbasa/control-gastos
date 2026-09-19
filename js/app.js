@@ -1,6 +1,7 @@
 import { estaConfigurado } from "./firebase.js";
 import { initVistaRegistro } from "./vista-registro.js";
 import { initVistaResumen, refrescar as refrescarResumen } from "./vista-resumen.js";
+import { initCopia } from "./copia.js";
 
 const $vistaRegistro = document.getElementById("vista-registro");
 const $vistaResumen = document.getElementById("vista-resumen");
@@ -28,3 +29,4 @@ if (!estaConfigurado()) {
 
 initVistaRegistro();
 initVistaResumen();
+initCopia();

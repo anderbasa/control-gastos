@@ -117,6 +117,14 @@
         </div>
       </div>
 
+      <div class="tendencia oculto" id="tendencia">
+        <div class="tendencia-cabecera">
+          <span class="tendencia-titulo">Últimos 6 meses</span>
+          <span class="tendencia-media" id="tendencia-media"></span>
+        </div>
+        <div class="tendencia-barras" id="tendencia-barras"></div>
+      </div>
+
       <div class="resumen-grafico" id="grafico-container"></div>
       <div class="resumen-desglose" id="desglose-categorias"></div>
 
@@ -145,6 +153,27 @@
         <p id="lista-resumen-filtro" class="lista-resumen-filtro oculto"></p>
       </div>
       <div class="lista-gastos" id="lista-gastos"></div>
+
+      <section class="copia" id="copia-seguridad">
+        <h2 class="lista-titulo">Copia de seguridad</h2>
+        <p class="copia-texto">
+          Descarga todos tus gastos y presupuestos en un archivo. Al restaurar, se añaden los que
+          falten y se actualizan los que coincidan; nunca se borra nada.
+        </p>
+        <p class="copia-ultima" id="copia-ultima"></p>
+        <div class="copia-botones">
+          <button id="btn-descargar-copia" class="btn-secundario">Descargar copia</button>
+          <button id="btn-restaurar-copia" class="btn-secundario">Restaurar copia</button>
+          <input type="file" id="input-copia" accept="application/json,.json" hidden />
+        </div>
+        <div class="copia-preview oculto" id="copia-preview">
+          <p class="copia-preview-texto" id="copia-preview-texto"></p>
+          <div class="copia-botones">
+            <button id="btn-confirmar-restaurar" class="btn-guardar">Restaurar</button>
+            <button id="btn-cancelar-restaurar" class="btn-secundario">Cancelar</button>
+          </div>
+        </div>
+      </section>
     </main>
   </div>
 

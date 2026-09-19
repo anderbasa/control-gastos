@@ -1,7 +1,7 @@
 import { CATEGORIAS, getCategoria } from "./config.js";
-import { gastosDelMes, getPresupuestos, guardarPresupuestos } from "./firebase.js";
+import { gastosEntre, getPresupuestos, guardarPresupuestos } from "./firebase.js";
 import { donutSVG, animarDonut } from "./graficos.js";
-import { formatoEuros, mostrarToast, svgIcono, animarNumero } from "./ui.js";
+import { formatoEuros, mostrarToast, svgIcono, animarNumero, escaparHtml } from "./ui.js";
 import { abrirModal } from "./vista-registro.js";
 import { exportarExcel } from "./excel.js";
 
@@ -27,6 +27,12 @@ const $buscarGasto = document.getElementById("buscar-gasto");
 const $filtroCategoria = document.getElementById("filtro-categoria");
 const $ordenGastos = document.getElementById("orden-gastos");
 const $listaResumenFiltro = document.getElementById("lista-resumen-filtro");
+
+const $tendencia = document.getElementById("tendencia");
+const $tendenciaBarras = document.getElementById("tendencia-barras");
+const $tendenciaMedia = document.getElementById("tendencia-media");
+
+const MESES_TENDENCIA = 6;
 
 let gastosActuales = [];
 let presupuestosActuales = {};
@@ -68,20 +74,39 @@ export function initVistaResumen() {
   $buscarGasto.addEventListener("input", () => renderLista(gastosActuales));
   $filtroCategoria.addEventListener("change", () => renderLista(gastosActuales));
   $ordenGastos.addEventListener("change", () => renderLista(gastosActuales));
+
+  $tendenciaBarras.addEventListener("click", (e) => {
+    const col = e.target.closest(".tendencia-col");
+    if (!col || col.dataset.mes === $selectorMes.value) return;
+    $selectorMes.value = col.dataset.mes;
+    refrescar();
+  });
+  document.addEventListener("datos-restaurados", refrescar);
+}
+
+function claveMes(fecha) {
+  return `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, "0")}`;
 }
 
 export async function refrescar() {
   const mesDate = parseMes($selectorMes.value || mesActualISO());
+  const mesSiguiente = new Date(mesDate.getFullYear(), mesDate.getMonth() + 1, 1);
+  const inicioVentana = new Date(mesDate.getFullYear(), mesDate.getMonth() - (MESES_TENDENCIA - 1), 1);
 
-  let gastos;
+  // Una sola consulta cubre el mes elegido, el anterior (comparación) y la tendencia.
+  let ventana;
   let presupuestos;
   try {
-    [gastos, presupuestos] = await Promise.all([gastosDelMes(mesDate), getPresupuestos()]);
+    [ventana, presupuestos] = await Promise.all([gastosEntre(inicioVentana, mesSiguiente), getPresupuestos()]);
   } catch (err) {
     console.error(err);
     mostrarToast("Error al cargar datos: " + err.message);
     return;
   }
+  const claveElegido = claveMes(mesDate);
+  const claveAnterior = claveMes(new Date(mesDate.getFullYear(), mesDate.getMonth() - 1, 1));
+  const gastos = ventana.filter((g) => claveMes(g.fecha) === claveElegido);
+  const gastosAnterior = ventana.filter((g) => claveMes(g.fecha) === claveAnterior);
   gastosActuales = gastos;
   presupuestosActuales = presupuestos;
 
@@ -95,11 +120,13 @@ export async function refrescar() {
   const mediaDiariaValor = diasTranscurridos > 0 ? total / diasTranscurridos : 0;
   $mediaDiaria.textContent = formatoEuros(mediaDiariaValor);
 
-  const comparacion = await actualizarComparacion(mesDate, total);
+  const comparacion = actualizarComparacion(gastosAnterior, total);
   const comparacionTexto = comparacion.texto;
   totalesAnteriores = comparacion.totalesPorCategoria;
 
   statsActuales = { total, mediaDiaria: mediaDiariaValor, diasDelMes, comparacionTexto };
+
+  renderTendencia(ventana, mesDate);
 
   const porCategoria = CATEGORIAS.map((c) => ({
     ...c,
@@ -235,7 +262,7 @@ function renderLista(todos) {
         <span class="icono-badge" style="--color-cat:${cat.color}">${svgIcono(cat.icono, 19)}</span>
         <div class="gasto-info">
           <div class="gasto-categoria">${cat.nombre}</div>
-          <div class="gasto-nota">${g.nota ? g.nota : g.fecha.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}</div>
+          <div class="gasto-nota">${g.nota ? escaparHtml(g.nota) : g.fecha.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" })}</div>
         </div>
         <span class="gasto-fecha">${fechaStr}</span>
         <span class="gasto-importe">${formatoEuros(g.importe)}</span>
@@ -256,15 +283,70 @@ function renderLista(todos) {
   });
 }
 
-async function actualizarComparacion(mesDate, totalActual) {
-  const mesAnteriorDate = new Date(mesDate.getFullYear(), mesDate.getMonth() - 1, 1);
-  let gastosAnterior;
-  try {
-    gastosAnterior = await gastosDelMes(mesAnteriorDate);
-  } catch (err) {
-    $comparacionMes.textContent = "—";
-    return { texto: "—", totalesPorCategoria: null };
+function valorCorto(valor) {
+  if (valor <= 0) return "–";
+  if (valor >= 1000) return `${(valor / 1000).toLocaleString("es-ES", { maximumFractionDigits: 1 })}k`;
+  return `${Math.round(valor)} €`;
+}
+
+// Barras de los últimos MESES_TENDENCIA meses terminando en el mes elegido; tocar una barra cambia de mes.
+function renderTendencia(ventana, mesElegido) {
+  const totales = {};
+  ventana.forEach((g) => {
+    const k = claveMes(g.fecha);
+    totales[k] = (totales[k] || 0) + g.importe;
+  });
+
+  const meses = [];
+  for (let i = MESES_TENDENCIA - 1; i >= 0; i--) {
+    const d = new Date(mesElegido.getFullYear(), mesElegido.getMonth() - i, 1);
+    const clave = claveMes(d);
+    let etiqueta = d.toLocaleDateString("es-ES", { month: "short" }).replace(".", "");
+    if (d.getMonth() === 0) etiqueta += ` ${String(d.getFullYear()).slice(2)}`;
+    meses.push({
+      clave,
+      etiqueta,
+      total: totales[clave] || 0,
+      nombreLargo: d.toLocaleDateString("es-ES", { month: "long", year: "numeric" }),
+    });
   }
+
+  const conDatos = meses.filter((m) => m.total > 0);
+  if (!conDatos.length) {
+    $tendencia.classList.add("oculto");
+    return;
+  }
+  $tendencia.classList.remove("oculto");
+  $tendenciaMedia.textContent =
+    conDatos.length >= 2
+      ? `media ${formatoEuros(conDatos.reduce((s, m) => s + m.total, 0) / conDatos.length)}/mes`
+      : "";
+
+  const maximo = Math.max(...meses.map((m) => m.total));
+  const claveElegida = claveMes(mesElegido);
+  $tendenciaBarras.innerHTML = meses
+    .map((m) => {
+      const alto = maximo > 0 ? Math.round((m.total / maximo) * 100) : 0;
+      return `
+      <button class="tendencia-col${m.clave === claveElegida ? " activo" : ""}" data-mes="${m.clave}"
+        aria-label="${m.nombreLargo}: ${formatoEuros(m.total)}">
+        <span class="tendencia-valor">${valorCorto(m.total)}</span>
+        <span class="tendencia-zona"><span class="tendencia-barra" data-alto="${alto}%"></span></span>
+        <span class="tendencia-mes">${m.etiqueta}</span>
+      </button>`;
+    })
+    .join("");
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      $tendenciaBarras.querySelectorAll(".tendencia-barra").forEach((el) => {
+        el.style.height = el.dataset.alto;
+      });
+    });
+  });
+}
+
+function actualizarComparacion(gastosAnterior, totalActual) {
   const totalAnterior = gastosAnterior.reduce((sum, g) => sum + g.importe, 0);
 
   $comparacionMes.classList.remove("subida", "bajada");

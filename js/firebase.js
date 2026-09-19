@@ -14,6 +14,7 @@ import {
   orderBy,
   Timestamp,
   serverTimestamp,
+  writeBatch,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { FIREBASE_CONFIG } from "./config.js";
 
@@ -65,10 +66,19 @@ export async function borrarGasto(id) {
   return conTimeout(deleteDoc(doc(db, "gastos", id)));
 }
 
-// Devuelve los gastos del mes indicado (Date, cualquier día de ese mes), ordenados desc.
-export async function gastosDelMes(fechaEnMes) {
-  const inicio = new Date(fechaEnMes.getFullYear(), fechaEnMes.getMonth(), 1);
-  const fin = new Date(fechaEnMes.getFullYear(), fechaEnMes.getMonth() + 1, 1);
+function docAGasto(d) {
+  const data = d.data();
+  return {
+    id: d.id,
+    importe: data.importe,
+    categoria: data.categoria,
+    nota: data.nota || "",
+    fecha: data.fecha ? data.fecha.toDate() : new Date(),
+  };
+}
+
+// Gastos con inicio <= fecha < fin (Dates), del más reciente al más antiguo.
+export async function gastosEntre(inicio, fin) {
   const q = query(
     gastosRef,
     where("fecha", ">=", Timestamp.fromDate(inicio)),
@@ -76,16 +86,32 @@ export async function gastosDelMes(fechaEnMes) {
     orderBy("fecha", "desc")
   );
   const snap = await conTimeout(getDocs(q));
-  return snap.docs.map((d) => {
-    const data = d.data();
-    return {
-      id: d.id,
-      importe: data.importe,
-      categoria: data.categoria,
-      nota: data.nota || "",
-      fecha: data.fecha ? data.fecha.toDate() : new Date(),
-    };
-  });
+  return snap.docs.map(docAGasto);
+}
+
+// Todos los gastos guardados, del más antiguo al más reciente (para la copia de seguridad).
+export async function todosLosGastos() {
+  const snap = await conTimeout(getDocs(query(gastosRef, orderBy("fecha", "asc"))), 30000);
+  return snap.docs.map(docAGasto);
+}
+
+// Escribe los gastos en lotes. Los que traen `id` se guardan con ese mismo id (así restaurar
+// dos veces no duplica nada); los que no, reciben uno nuevo. Nunca borra documentos.
+export async function importarGastos(gastos) {
+  const TAM_LOTE = 400;
+  for (let i = 0; i < gastos.length; i += TAM_LOTE) {
+    const lote = writeBatch(db);
+    gastos.slice(i, i + TAM_LOTE).forEach((g) => {
+      const ref = g.id ? doc(db, "gastos", g.id) : doc(gastosRef);
+      lote.set(ref, {
+        importe: g.importe,
+        categoria: g.categoria,
+        nota: g.nota || "",
+        fecha: Timestamp.fromDate(g.fecha),
+      });
+    });
+    await conTimeout(lote.commit(), 30000);
+  }
 }
 
 // Presupuestos: un único documento config/presupuestos con { [categoriaId]: limite }.

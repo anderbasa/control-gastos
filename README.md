@@ -128,6 +128,14 @@ navegador — si no, abrir la URL normal funciona igual de bien.
   fecha opcionales, en menos de 5 segundos.
 - **Resumen mensual**: total, media diaria, comparación con el mes anterior,
   donut de desglose por categoría y lista editable de movimientos.
+- **Tendencia de 6 meses**: barras con el gasto de cada mes (termina en el mes
+  que estás viendo) y la media mensual; tocar una barra salta a ese mes.
+- **Copia de seguridad**: al final del resumen, "Descargar copia" guarda todos
+  tus gastos y presupuestos en un `.json`, y "Restaurar copia" los vuelve a
+  cargar. Restaurar nunca borra: añade lo que falte y actualiza lo que coincida
+  por id, así que repetirlo no duplica nada. Se muestra un resumen antes de
+  aplicarla y se descartan las entradas que no cumplan las reglas de la base
+  de datos.
 - **Cambio por categoría**: cada categoría del desglose indica si has gastado
   más o menos que el mes anterior (↑ / ↓ %), o si es nueva este mes.
 - **Buscar, filtrar y ordenar movimientos**: en el resumen puedes buscar por
@@ -158,6 +166,7 @@ js/app.js               router entre vista registro / resumen
 js/vista-registro.js    asistente de registro (importe → categoría) + modal de edición
 js/teclado.js           teclado numérico reutilizado por el registro y la edición
 js/vista-resumen.js     selector de mes, totales, presupuestos, gráfico, lista
+js/copia.js             copia de seguridad: descargar y restaurar el .json
 js/graficos.js          donut SVG dibujado a mano, con animación de entrada
 js/excel.js             generación del .xlsx (ExcelJS): hojas Informe, Gastos y Resumen
 js/graficos-informe.js  gráficas (donut + barras por día) dibujadas en canvas y exportadas como PNG
