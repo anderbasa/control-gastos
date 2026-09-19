@@ -23,9 +23,20 @@ const $btnCerrarPresupuestos = document.getElementById("btn-cerrar-presupuestos"
 const $listaPresupuestos = document.getElementById("lista-presupuestos");
 const $btnGuardarPresupuestos = document.getElementById("btn-guardar-presupuestos");
 
+const $buscarGasto = document.getElementById("buscar-gasto");
+const $filtroCategoria = document.getElementById("filtro-categoria");
+const $ordenGastos = document.getElementById("orden-gastos");
+const $listaResumenFiltro = document.getElementById("lista-resumen-filtro");
+
 let gastosActuales = [];
 let presupuestosActuales = {};
 let statsActuales = { total: 0, mediaDiaria: 0, diasDelMes: 30, comparacionTexto: "—" };
+// Totales por categoría del mes anterior; null si no se pudieron cargar o ese mes no tiene gastos.
+let totalesAnteriores = null;
+
+function normalizar(texto) {
+  return texto.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+}
 
 function mesActualISO() {
   const d = new Date();
@@ -50,6 +61,13 @@ export function initVistaResumen() {
   $btnCerrarPresupuestos.addEventListener("click", cerrarModalPresupuestos);
   $btnGuardarPresupuestos.addEventListener("click", onGuardarPresupuestos);
   $btnExportarExcel.addEventListener("click", onExportarExcel);
+
+  CATEGORIAS.forEach((c) => {
+    $filtroCategoria.insertAdjacentHTML("beforeend", `<option value="${c.id}">${c.nombre}</option>`);
+  });
+  $buscarGasto.addEventListener("input", () => renderLista(gastosActuales));
+  $filtroCategoria.addEventListener("change", () => renderLista(gastosActuales));
+  $ordenGastos.addEventListener("change", () => renderLista(gastosActuales));
 }
 
 export async function refrescar() {
@@ -77,7 +95,9 @@ export async function refrescar() {
   const mediaDiariaValor = diasTranscurridos > 0 ? total / diasTranscurridos : 0;
   $mediaDiaria.textContent = formatoEuros(mediaDiariaValor);
 
-  const comparacionTexto = await actualizarComparacion(mesDate, total);
+  const comparacion = await actualizarComparacion(mesDate, total);
+  const comparacionTexto = comparacion.texto;
+  totalesAnteriores = comparacion.totalesPorCategoria;
 
   statsActuales = { total, mediaDiaria: mediaDiariaValor, diasDelMes, comparacionTexto };
 
@@ -114,7 +134,7 @@ export async function refrescar() {
       <div class="desglose-fila">
         <div class="desglose-fila-top">
           <span class="icono-badge" style="--color-cat:${c.color}">${svgIcono(c.icono, 17)}</span>
-          <span class="desglose-nombre">${c.nombre}</span>
+          <span class="desglose-nombre">${c.nombre}${deltaCategoriaHtml(c.id, c.valor)}</span>
           <span class="desglose-pct">${pct}%</span>
           <span class="desglose-importe">${formatoEuros(c.valor)}</span>
         </div>
@@ -131,16 +151,19 @@ export async function refrescar() {
     });
   });
 
-  actualizarPresupuestoTotal(presupuestos, porCategoria, total);
+  actualizarPresupuestoTotal(presupuestos, porCategoria);
   renderLista(gastos);
 }
 
-function actualizarPresupuestoTotal(presupuestos, porCategoria, total) {
+function actualizarPresupuestoTotal(presupuestos, porCategoria) {
   const limiteTotal = Object.values(presupuestos).reduce((s, v) => s + (Number(v) || 0), 0);
   if (limiteTotal <= 0) {
     $presupuestoTotalBar.classList.add("oculto");
     return;
   }
+  // Solo cuenta el gasto de las categorías que tienen presupuesto; comparar el gasto total
+  // con la suma de presupuestos parciales daría un porcentaje engañoso.
+  const total = porCategoria.filter((c) => c.limite > 0).reduce((s, c) => s + c.valor, 0);
   $presupuestoTotalBar.classList.remove("oculto");
   const pct = Math.min(100, Math.round((total / limiteTotal) * 100));
   const nivel = nivelBarra((total / limiteTotal) * 100);
@@ -154,9 +177,53 @@ function actualizarPresupuestoTotal(presupuestos, porCategoria, total) {
   $presupuestoTotalTexto.textContent = `${formatoEuros(total)} de ${formatoEuros(limiteTotal)} presupuestados`;
 }
 
-function renderLista(gastos) {
-  if (!gastos.length) {
+// Cambio de una categoría respecto al mes anterior. Sin datos del mes anterior no se muestra nada,
+// para no llenar todas las filas de "nuevo" cuando aún no hay historial.
+function deltaCategoriaHtml(categoriaId, valorActual) {
+  if (!totalesAnteriores) return "";
+  const anterior = totalesAnteriores[categoriaId] || 0;
+  if (anterior === 0) return `<span class="desglose-delta">nuevo este mes</span>`;
+  const pct = Math.round(((valorActual - anterior) / anterior) * 100);
+  if (pct === 0) return `<span class="desglose-delta">igual que el mes anterior</span>`;
+  const clase = pct > 0 ? "subida" : "bajada";
+  const flecha = pct > 0 ? "↑" : "↓";
+  return `<span class="desglose-delta ${clase}">${flecha} ${Math.abs(pct)}% vs. mes anterior</span>`;
+}
+
+function aplicarFiltros(gastos) {
+  const texto = normalizar($buscarGasto.value.trim());
+  const categoria = $filtroCategoria.value;
+  const filtrados = gastos.filter((g) => {
+    if (categoria !== "todas" && g.categoria !== categoria) return false;
+    if (!texto) return true;
+    return normalizar(`${g.nota} ${getCategoria(g.categoria).nombre}`).includes(texto);
+  });
+  const orden = $ordenGastos.value;
+  filtrados.sort((a, b) => {
+    if (orden === "fecha-asc") return a.fecha - b.fecha;
+    if (orden === "importe-desc") return b.importe - a.importe;
+    if (orden === "importe-asc") return a.importe - b.importe;
+    return b.fecha - a.fecha;
+  });
+  return { filtrados, hayFiltro: Boolean(texto) || categoria !== "todas" };
+}
+
+function renderLista(todos) {
+  if (!todos.length) {
+    $listaResumenFiltro.classList.add("oculto");
     $lista.innerHTML = `<p class="vacio">No hay gastos registrados este mes</p>`;
+    return;
+  }
+  const { filtrados: gastos, hayFiltro } = aplicarFiltros(todos);
+  if (hayFiltro) {
+    const suma = gastos.reduce((s, g) => s + g.importe, 0);
+    $listaResumenFiltro.textContent = `${gastos.length} ${gastos.length === 1 ? "movimiento" : "movimientos"} · ${formatoEuros(suma)}`;
+    $listaResumenFiltro.classList.remove("oculto");
+  } else {
+    $listaResumenFiltro.classList.add("oculto");
+  }
+  if (!gastos.length) {
+    $lista.innerHTML = `<p class="vacio">Ningún movimiento coincide con la búsqueda</p>`;
     return;
   }
   $lista.innerHTML = gastos
@@ -196,7 +263,7 @@ async function actualizarComparacion(mesDate, totalActual) {
     gastosAnterior = await gastosDelMes(mesAnteriorDate);
   } catch (err) {
     $comparacionMes.textContent = "—";
-    return "—";
+    return { texto: "—", totalesPorCategoria: null };
   }
   const totalAnterior = gastosAnterior.reduce((sum, g) => sum + g.importe, 0);
 
@@ -204,15 +271,21 @@ async function actualizarComparacion(mesDate, totalActual) {
   if (totalAnterior === 0) {
     const texto = totalActual > 0 ? "Mes nuevo" : "—";
     $comparacionMes.textContent = texto;
-    return texto;
+    return { texto, totalesPorCategoria: null };
   }
+
+  const totalesPorCategoria = {};
+  gastosAnterior.forEach((g) => {
+    totalesPorCategoria[g.categoria] = (totalesPorCategoria[g.categoria] || 0) + g.importe;
+  });
+
   const diff = totalActual - totalAnterior;
   const pct = Math.round((diff / totalAnterior) * 100);
   const signo = diff >= 0 ? "+" : "";
   const texto = `${signo}${pct}% (${signo}${formatoEuros(diff)})`;
   $comparacionMes.textContent = texto;
   $comparacionMes.classList.add(diff > 0 ? "subida" : "bajada");
-  return texto;
+  return { texto, totalesPorCategoria };
 }
 
 function abrirModalPresupuestos() {

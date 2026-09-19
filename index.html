@@ -129,6 +129,21 @@
       </button>
 
       <h2 class="lista-titulo">Movimientos</h2>
+      <div class="lista-controles">
+        <input type="search" id="buscar-gasto" class="input-buscar" placeholder="Buscar en notas y categorías..." autocomplete="off" />
+        <div class="lista-controles-fila">
+          <select id="filtro-categoria" class="select-filtro" aria-label="Filtrar por categoría">
+            <option value="todas">Todas</option>
+          </select>
+          <select id="orden-gastos" class="select-filtro" aria-label="Ordenar movimientos">
+            <option value="fecha-desc">Más recientes</option>
+            <option value="fecha-asc">Más antiguos</option>
+            <option value="importe-desc">Mayor importe</option>
+            <option value="importe-asc">Menor importe</option>
+          </select>
+        </div>
+        <p id="lista-resumen-filtro" class="lista-resumen-filtro oculto"></p>
+      </div>
       <div class="lista-gastos" id="lista-gastos"></div>
     </main>
   </div>

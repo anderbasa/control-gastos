@@ -737,6 +737,61 @@ body {
   margin: 0 0 10px;
 }
 
+.lista-controles {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.lista-controles-fila {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.input-buscar,
+.select-filtro {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--borde);
+  border-radius: 13px;
+  padding: 11px 12px;
+  font-family: var(--fuente);
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--superficie);
+  color: var(--texto);
+}
+
+.input-buscar::placeholder {
+  color: var(--texto-suave);
+  font-weight: 500;
+}
+
+.lista-resumen-filtro {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--acento);
+}
+
+.desglose-delta {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 700;
+  margin-top: 2px;
+  color: var(--texto-suave);
+}
+
+.desglose-delta.subida {
+  color: var(--peligro);
+}
+
+.desglose-delta.bajada {
+  color: var(--exito);
+}
+
 .lista-gastos {
   display: flex;
   flex-direction: column;

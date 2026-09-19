@@ -128,6 +128,11 @@ navegador — si no, abrir la URL normal funciona igual de bien.
   fecha opcionales, en menos de 5 segundos.
 - **Resumen mensual**: total, media diaria, comparación con el mes anterior,
   donut de desglose por categoría y lista editable de movimientos.
+- **Cambio por categoría**: cada categoría del desglose indica si has gastado
+  más o menos que el mes anterior (↑ / ↓ %), o si es nueva este mes.
+- **Buscar, filtrar y ordenar movimientos**: en el resumen puedes buscar por
+  nota o categoría (sin distinguir mayúsculas ni tildes), filtrar por categoría
+  y ordenar por fecha o importe; al filtrar ves cuántos movimientos son y su suma.
 - **Presupuestos por categoría**: desde el icono ⚙️ del resumen defines un
   límite mensual por categoría (o lo dejas en blanco para no ponerle límite).
   Cada categoría con presupuesto muestra una barra de progreso (verde → ámbar
