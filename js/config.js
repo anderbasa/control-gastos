@@ -20,11 +20,14 @@ const ICONOS = {
   facturas: '<path d="M6 2h12v18l-3-2-3 2-3-2-3 2V2Z"/><path d="M9 7h6M9 11h6M9 15h4"/>',
   salud:
     '<path d="M12 20s-6.5-4.35-9-8.5C1.2 8.1 2.3 4.5 6 4c2 0 3.6 1.4 4 3 .4-1.6 2-3 4-3 3.7.5 4.8 4.1 3 7.5-2.5 4.15-9 8.5-9 8.5Z"/><path d="M4.5 12H8l1.8 3.6L13 8l1.8 4H19.5"/>',
+  viajes:
+    '<path d="M12 2.5c-.8 0-1.5 1-1.5 2.5v13.5l1.5 2.5 1.5-2.5V5c0-1.5-.7-2.5-1.5-2.5Z"/><path d="M10.5 9.5 2.5 14v1.5l8-2.5M13.5 9.5l8 4.5v1.5l-8-2.5"/><path d="M10.5 18.5 8 20.5v1l2.5-.8M13.5 18.5l2.5 2v1l-2.5-.8"/>',
   otros: '<path d="M21 8 12 3 3 8v8l9 5 9-5V8Z"/><path d="M3 8l9 5 9-5M12 13v8"/>',
 };
 
 // Lista cerrada de categorías. Añadir una nueva = añadir un objeto aquí
 // (y un icono en ICONOS de arriba; si se omite, se usa el de "otros").
+// "otros" debe ir siempre la última: getCategoria la usa como categoría por defecto.
 export const CATEGORIAS = [
   { id: "comida", nombre: "Comida", color: "#E4572E" },
   { id: "transporte", nombre: "Transporte", color: "#3B82C4" },
@@ -32,6 +35,7 @@ export const CATEGORIAS = [
   { id: "compras", nombre: "Compras", color: "#D4A017" },
   { id: "facturas", nombre: "Facturas/Suscripciones", color: "#546E7A" },
   { id: "salud", nombre: "Salud", color: "#2E9E6D" },
+  { id: "viajes", nombre: "Viajes", color: "#D6407F" },
   { id: "otros", nombre: "Otros", color: "#8D8D8D" },
 ].map((c) => ({ ...c, icono: ICONOS[c.id] || ICONOS.otros }));
 

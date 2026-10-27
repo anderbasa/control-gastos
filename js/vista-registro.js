@@ -25,6 +25,7 @@ const $importeValor = document.getElementById("importe-valor");
 const $tecladoModalEl = document.getElementById("teclado");
 const $modalIcono = document.getElementById("modal-categoria-icono");
 const $modalNombre = document.getElementById("modal-categoria-nombre");
+const $modalCategorias = document.getElementById("modal-categorias");
 const $btnCerrar = document.getElementById("btn-cerrar-modal");
 const $btnNotaToggle = document.getElementById("btn-nota-toggle");
 const $inputNota = document.getElementById("input-nota");
@@ -76,6 +77,20 @@ export function initVistaRegistro() {
 
   // --- Modal de edición ---
   tecladoModal = crearTeclado($tecladoModalEl, $importeValor);
+
+  $modalCategorias.innerHTML = CATEGORIAS.map(
+    (c) => `
+    <button type="button" class="chip-mini" role="radio" aria-checked="false" data-id="${c.id}" style="--color-cat:${c.color}">
+      <span class="icono-badge">${svgIcono(c.icono, 15)}</span>
+      <span>${c.nombre}</span>
+    </button>`
+  ).join("");
+  $modalCategorias.addEventListener("click", (e) => {
+    const chip = e.target.closest(".chip-mini");
+    if (!chip || !estadoEdicion) return;
+    estadoEdicion.categoriaId = chip.dataset.id;
+    pintarCategoriaModal(chip.dataset.id);
+  });
 
   $btnCerrar.addEventListener("click", cerrarModal);
   $btnNotaToggle.addEventListener("click", () => {
@@ -142,17 +157,27 @@ async function onCategoriaElegida(categoriaId) {
 
 // --- Edición desde el resumen mensual ---
 
-export function abrirModal({ categoriaId, gasto, onGuardado }) {
+// Cabecera del modal + chip marcado según la categoría elegida.
+function pintarCategoriaModal(categoriaId) {
   const cat = getCategoria(categoriaId);
+  $modalIcono.innerHTML = svgIcono(cat.icono, 19);
+  $modalIcono.style.background = `color-mix(in srgb, ${cat.color} 16%, transparent)`;
+  $modalIcono.style.color = cat.color;
+  $modalNombre.textContent = cat.nombre;
+  $modalCategorias.querySelectorAll(".chip-mini").forEach((chip) => {
+    const activo = chip.dataset.id === categoriaId;
+    chip.classList.toggle("activo", activo);
+    chip.setAttribute("aria-checked", String(activo));
+  });
+}
+
+export function abrirModal({ categoriaId, gasto, onGuardado }) {
   estadoEdicion = { categoriaId, gastoId: gasto.id, fecha: gasto.fecha };
   alGuardarCallback = onGuardado || null;
 
   tecladoModal.valor = String(gasto.importe).replace(".", ",");
 
-  $modalIcono.innerHTML = svgIcono(cat.icono, 19);
-  $modalIcono.style.background = `color-mix(in srgb, ${cat.color} 16%, transparent)`;
-  $modalIcono.style.color = cat.color;
-  $modalNombre.textContent = cat.nombre;
+  pintarCategoriaModal(categoriaId);
 
   $inputNota.value = gasto.nota || "";
   $inputNota.classList.toggle("oculto", !gasto.nota);
@@ -165,6 +190,10 @@ export function abrirModal({ categoriaId, gasto, onGuardado }) {
   $btnBorrar.classList.remove("oculto");
 
   $modal.classList.remove("oculto");
+
+  // Deja a la vista el chip de la categoría actual (la fila se desplaza en horizontal).
+  const activo = $modalCategorias.querySelector(".chip-mini.activo");
+  $modalCategorias.scrollLeft = activo ? activo.offsetLeft - 20 : 0;
 }
 
 function cerrarModal() {

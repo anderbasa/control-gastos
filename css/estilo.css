@@ -282,6 +282,8 @@ body {
   gap: 14px;
   box-shadow: var(--sombra-modal);
   animation: subirModal 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  max-height: 94vh;
+  overflow-y: auto;
 }
 
 @keyframes subirModal {
@@ -323,6 +325,57 @@ body {
   margin-left: auto;
   width: 36px;
   height: 36px;
+}
+
+.modal-categorias {
+  position: relative;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin: -4px -20px 0;
+  padding: 2px 20px 4px;
+  scrollbar-width: none;
+}
+
+.modal-categorias::-webkit-scrollbar {
+  display: none;
+}
+
+.chip-mini {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 13px 5px 5px;
+  border-radius: 999px;
+  border: 1.5px solid var(--borde);
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: var(--fuente);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.chip-mini .icono-badge {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chip-mini .icono-badge svg {
+  width: 15px;
+  height: 15px;
+}
+
+.chip-mini.activo {
+  border-color: var(--color-cat);
+  background: color-mix(in srgb, var(--color-cat) 12%, var(--superficie-alta));
 }
 
 .modal-hint {

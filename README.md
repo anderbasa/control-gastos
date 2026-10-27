@@ -126,8 +126,12 @@ navegador — si no, abrir la URL normal funciona igual de bien.
 
 - **Registro rápido**: categoría + importe con teclado numérico propio, nota y
   fecha opcionales, en menos de 5 segundos.
+- **Categorías**: Comida, Transporte, Ocio, Compras, Facturas/Suscripciones,
+  Salud, Viajes y Otros.
 - **Resumen mensual**: total, media diaria, comparación con el mes anterior,
-  donut de desglose por categoría y lista editable de movimientos.
+  donut de desglose por categoría y lista editable de movimientos. Al tocar un
+  movimiento puedes cambiar su importe, nota, fecha y también su categoría (la
+  fila de categorías de arriba del modal).
 - **Tendencia de 6 meses**: barras con el gasto de cada mes (termina en el mes
   que estás viendo) y la media mensual; tocar una barra salta a ese mes.
 - **Copia de seguridad**: al final del resumen, "Descargar copia" guarda todos
@@ -186,6 +190,8 @@ manifest.json / sw.js   soporte PWA básico (instalable, funciona offline salvo 
 ## Ampliar categorías
 
 Edita el array `CATEGORIAS` en [`js/config.js`](js/config.js): cada entrada es
-`{ id, nombre, emoji, color }`. El `id` es el valor que se guarda en Firestore,
-así que si renombras una categoría existente cambia solo `nombre`/`emoji`/`color`,
-no el `id` (o los gastos antiguos quedarán con una categoría "fantasma").
+`{ id, nombre, color }`, y su icono va en `ICONOS` con el mismo `id`. El `id` es el
+valor que se guarda en Firestore, así que si renombras una categoría existente cambia
+solo `nombre`/`color`, no el `id` (o los gastos antiguos quedarán con una categoría
+"fantasma"). "Otros" tiene que seguir siendo la última de la lista: es la que se usa
+por defecto para cualquier categoría desconocida.
