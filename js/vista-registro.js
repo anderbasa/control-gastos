@@ -1,5 +1,5 @@
 import { CATEGORIAS, getCategoria } from "./config.js";
-import { crearGasto, actualizarGasto, borrarGasto } from "./firebase.js";
+import { crearGasto, actualizarGasto, borrarGasto, importarGastos } from "./firebase.js";
 import { mostrarToast, svgIcono, formatoEuros } from "./ui.js";
 import { crearTeclado, parseImporte } from "./teclado.js";
 
@@ -147,6 +147,7 @@ async function onCategoriaElegida(categoriaId) {
     await crearGasto({ importe, categoria: categoriaId, nota, fecha });
     mostrarToast("Gasto guardado");
     resetPasoImporte();
+    document.dispatchEvent(new CustomEvent("gasto-guardado"));
   } catch (err) {
     console.error(err);
     mostrarToast("Error al guardar: " + err.message);
@@ -172,7 +173,8 @@ function pintarCategoriaModal(categoriaId) {
 }
 
 export function abrirModal({ categoriaId, gasto, onGuardado }) {
-  estadoEdicion = { categoriaId, gastoId: gasto.id, fecha: gasto.fecha };
+  // `original` guarda el gasto tal como está en la base de datos, para poder deshacer un borrado.
+  estadoEdicion = { categoriaId, gastoId: gasto.id, fecha: gasto.fecha, original: { ...gasto } };
   alGuardarCallback = onGuardado || null;
 
   tecladoModal.valor = String(gasto.importe).replace(".", ",");
@@ -239,17 +241,36 @@ async function onGuardarEdicion() {
   }
 }
 
+// Sin ventana de confirmación: se borra al momento y durante 5 s se puede deshacer, que vuelve a
+// escribir el gasto con su mismo id (importarGastos), así que queda exactamente como estaba.
 async function onBorrar() {
   if (!estadoEdicion) return;
-  if (!confirm("¿Borrar este gasto?")) return;
+  const original = estadoEdicion.original;
+  $btnBorrar.disabled = true;
   try {
     await borrarGasto(estadoEdicion.gastoId);
-    mostrarToast("Gasto borrado");
     const cb = alGuardarCallback;
     cerrarModal();
     if (cb) cb();
+    mostrarToast("Gasto borrado", {
+      duracion: 5000,
+      accion: { texto: "Deshacer", alPulsar: () => deshacerBorrado(original) },
+    });
   } catch (err) {
     console.error(err);
     mostrarToast("Error al borrar: " + err.message);
+  } finally {
+    $btnBorrar.disabled = false;
+  }
+}
+
+async function deshacerBorrado(gasto) {
+  try {
+    await importarGastos([gasto]);
+    mostrarToast("Gasto recuperado");
+    document.dispatchEvent(new CustomEvent("datos-restaurados"));
+  } catch (err) {
+    console.error(err);
+    mostrarToast("No se pudo recuperar: " + err.message);
   }
 }

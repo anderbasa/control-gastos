@@ -132,6 +132,14 @@ navegador — si no, abrir la URL normal funciona igual de bien.
   gastos son los mismos porque están en Firestore. El Excel y la copia de seguridad
   se guardan con el menú Compartir (Archivos, Drive, correo…), y la app carga
   siempre la última versión cuando hay conexión.
+- **Disponible hoy**: en la pantalla principal, cuánto puedes gastar hoy sin pasarte
+  del presupuesto del mes (lo que quedaba al empezar el día, repartido entre los días
+  que faltan, menos lo que llevas hoy). Solo cuentan las categorías con presupuesto;
+  si no hay ninguno, un enlace lleva directo a ponerlo.
+- **Deshacer al borrar**: borrar un gasto ya no pide confirmación; durante 5 s el
+  aviso ofrece "Deshacer", que lo restaura con el mismo id y los mismos datos.
+- **Pantalla de carga en iPhone**: al abrir la app instalada se ve el logo (en claro
+  u oscuro según el móvil) en vez de un destello en blanco (`icons/splash/`).
 - **Categorías**: Comida, Transporte, Ocio, Compras, Facturas/Suscripciones,
   Salud, Viajes y Otros.
 - **Resumen mensual**: total, media diaria, comparación con el mes anterior,
@@ -186,6 +194,7 @@ js/vista-registro.js    asistente de registro (importe → categoría) + modal d
 js/teclado.js           teclado numérico reutilizado por el registro y la edición
 js/vista-resumen.js     selector de mes, totales, presupuestos, gráfico, lista
 js/copia.js             copia de seguridad: descargar y restaurar el .json
+js/disponible.js        "Disponible hoy" de la pantalla principal
 js/graficos.js          donut SVG dibujado a mano, con animación de entrada
 js/excel.js             generación del .xlsx (ExcelJS): hojas Informe, Gastos y Resumen
 js/graficos-informe.js  gráficas (donut + barras por día) dibujadas en canvas y exportadas como PNG

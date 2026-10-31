@@ -414,7 +414,7 @@ function actualizarComparacion({ hayHistorial, anteriorComparable, totalActual, 
   return { texto, totalesPorCategoria };
 }
 
-function abrirModalPresupuestos() {
+export function abrirModalPresupuestos() {
   $listaPresupuestos.innerHTML = CATEGORIAS.map(
     (c) => `
     <div class="presupuesto-fila">

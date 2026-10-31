@@ -1,15 +1,35 @@
 let timeoutId = null;
+let timeoutSalida = null;
 
-export function mostrarToast(mensaje, duracion = 2600) {
+// accion: { texto, alPulsar } opcional — añade un botón al aviso (p. ej. "Deshacer").
+export function mostrarToast(mensaje, { duracion = 2600, accion } = {}) {
   const $toast = document.getElementById("toast");
-  $toast.textContent = mensaje;
-  $toast.classList.remove("oculto");
-  $toast.classList.remove("toast-salir");
+  $toast.textContent = "";
+  const $texto = document.createElement("span");
+  $texto.textContent = mensaje;
+  $toast.appendChild($texto);
+  if (accion) {
+    const $btn = document.createElement("button");
+    $btn.type = "button";
+    $btn.className = "toast-accion";
+    $btn.textContent = accion.texto;
+    $btn.addEventListener("click", () => {
+      ocultarToast();
+      accion.alPulsar();
+    }, { once: true });
+    $toast.appendChild($btn);
+  }
+  $toast.classList.remove("oculto", "toast-salir");
   clearTimeout(timeoutId);
-  timeoutId = setTimeout(() => {
-    $toast.classList.add("toast-salir");
-    setTimeout(() => $toast.classList.add("oculto"), 200);
-  }, duracion);
+  clearTimeout(timeoutSalida);
+  timeoutId = setTimeout(ocultarToast, duracion);
+}
+
+function ocultarToast() {
+  const $toast = document.getElementById("toast");
+  clearTimeout(timeoutId);
+  $toast.classList.add("toast-salir");
+  timeoutSalida = setTimeout(() => $toast.classList.add("oculto"), 200);
 }
 
 // Entrega un archivo al usuario. Si el navegador puede compartir archivos (iPhone, Android) abre el

@@ -13,6 +13,27 @@
   <meta name="apple-mobile-web-app-title" content="Gastos" />
   <!-- Translúcida: la app se dibuja bajo la hora, y css/estilo.css pinta esa franja de color (--safe-top). -->
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <!-- Pantallas de carga de la app de iPhone (una por modelo y tema). -->
+  <link rel="apple-touch-startup-image" href="icons/splash/splash-750-x-1334-light.png" media="(prefers-color-scheme: light) and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="icons/splash/splash-750-x-1334-dark.png" media="(prefers-color-scheme: dark) and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="icons/splash/splash-828-x-1792-light.png" media="(prefers-color-scheme: light) and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="icons/splash/splash-828-x-1792-dark.png" media="(prefers-color-scheme: dark) and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="icons/splash/splash-1242-x-2688-light.png" media="(prefers-color-scheme: light) and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="icons/splash/splash-1242-x-2688-dark.png" media="(prefers-color-scheme: dark) and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="icons/splash/splash-1125-x-2436-light.png" media="(prefers-color-scheme: light) and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="icons/splash/splash-1125-x-2436-dark.png" media="(prefers-color-scheme: dark) and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="icons/splash/splash-1170-x-2532-light.png" media="(prefers-color-scheme: light) and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="icons/splash/splash-1170-x-2532-dark.png" media="(prefers-color-scheme: dark) and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="icons/splash/splash-1179-x-2556-light.png" media="(prefers-color-scheme: light) and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="icons/splash/splash-1179-x-2556-dark.png" media="(prefers-color-scheme: dark) and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="icons/splash/splash-1284-x-2778-light.png" media="(prefers-color-scheme: light) and (device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="icons/splash/splash-1284-x-2778-dark.png" media="(prefers-color-scheme: dark) and (device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="icons/splash/splash-1290-x-2796-light.png" media="(prefers-color-scheme: light) and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="icons/splash/splash-1290-x-2796-dark.png" media="(prefers-color-scheme: dark) and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="icons/splash/splash-1206-x-2622-light.png" media="(prefers-color-scheme: light) and (device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="icons/splash/splash-1206-x-2622-dark.png" media="(prefers-color-scheme: dark) and (device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="icons/splash/splash-1320-x-2868-light.png" media="(prefers-color-scheme: light) and (device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
+  <link rel="apple-touch-startup-image" href="icons/splash/splash-1320-x-2868-dark.png" media="(prefers-color-scheme: dark) and (device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -57,6 +78,16 @@
 
     <main id="vista-registro" class="vista">
       <div id="paso-importe" class="paso-importe">
+        <div id="disponible-hoy" class="disponible oculto">
+          <div>
+            <div class="disponible-etiqueta" id="disponible-etiqueta"></div>
+            <div class="disponible-detalle" id="disponible-detalle"></div>
+          </div>
+          <div class="disponible-valor" id="disponible-valor"></div>
+        </div>
+        <button id="disponible-sin-presupuesto" class="link-btn disponible-sin-presupuesto oculto">
+          Pon un presupuesto mensual y verás cuánto puedes gastar cada día →
+        </button>
         <p class="paso-titulo">¿Cuánto has gastado?</p>
         <div class="importe-display">
           <span id="importe-valor-home">0</span><span class="importe-moneda">€</span>
