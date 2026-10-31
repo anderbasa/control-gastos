@@ -1,6 +1,6 @@
 import { CATEGORIAS, getCategoria } from "./config.js";
 import { crearGasto, actualizarGasto, borrarGasto, importarGastos } from "./firebase.js";
-import { mostrarToast, mostrarGuardado, svgIcono, formatoEuros } from "./ui.js";
+import { mostrarToast, mostrarGuardado, svgIcono, formatoEuros, vibrar } from "./ui.js";
 import { crearTeclado, parseImporte } from "./teclado.js";
 
 // --- Elementos: paso 1 (importe) ---
@@ -138,6 +138,7 @@ function resetPasoImporte() {
 
 async function onCategoriaElegida(categoriaId) {
   if (guardandoRapido) return;
+  vibrar();
   const importe = parseImporte(tecladoHome.valor);
   const nota = $inputNotaHome.value.trim();
   const fecha = $inputFechaHome.classList.contains("oculto") ? null : new Date($inputFechaHome.value);
@@ -244,6 +245,7 @@ async function onGuardarEdicion() {
 // escribir el gasto con su mismo id (importarGastos), así que queda exactamente como estaba.
 async function onBorrar() {
   if (!estadoEdicion) return;
+  vibrar();
   const original = estadoEdicion.original;
   $btnBorrar.disabled = true;
   try {

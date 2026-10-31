@@ -1,9 +1,10 @@
-const CACHE = "gastos-v13";
+const CACHE = "gastos-v14";
 const ARCHIVOS = [
   "./",
   "./index.html",
   "./css/estilo.css",
   "./js/app.js",
+  "./js/ano.js",
   "./js/config.js",
   "./js/copia.js",
   "./js/disponible.js",

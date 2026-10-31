@@ -1,4 +1,4 @@
-import { svgIcono } from "./ui.js";
+import { svgIcono, vibrar } from "./ui.js";
 
 const ICONO_BACKSPACE =
   '<path d="M9 5h11a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H9l-6-7 6-7Z"/><path d="M13 10l4 4M17 10l-4 4"/>';
@@ -21,6 +21,7 @@ export function crearTeclado(contenedorEl, elementoDisplay, { valorInicial = "0"
   }
 
   function pulsar(t) {
+    vibrar();
     if (t === "⌫") {
       valor = valor.length > 1 ? valor.slice(0, -1) : "0";
     } else if (t === ",") {

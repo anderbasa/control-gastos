@@ -179,8 +179,14 @@ navegador — si no, abrir la URL normal funciona igual de bien.
   bajado), un calendario coloreado según lo gastado cada día (tocas un día y ves sus
   gastos), una tabla por categoría con barras y los 5 gastos más grandes. Abajo,
   "Descargar en Excel" genera el .xlsx de siempre (hojas Informe, Gastos y Resumen).
+- **Tu año en gastos**: botón del resumen que abre, a pantalla completa y tocando para
+  avanzar (como unas historias), el resumen del año del mes elegido: total, mes más caro con
+  gráfico de los 12 meses, categoría estrella, récords (día más caro y gasto más grande) y
+  tu "clásico" (la nota que más repites).
+- **Vibración**: toque háptico al pulsar el teclado, guardar y borrar (en iPhone con iOS 18
+  o posterior, mediante un interruptor oculto; en Android, la vibración normal).
 - **Aspecto de iPhone**: iconos de categoría al estilo de la app Ajustes (colores del
-  sistema de iOS), logo de monedero con degradado, importes con la fuente redondeada
+  sistema de iOS), logo de monedero con una moneda de € sobre degradado, importes con la fuente redondeada
   del iPhone, check animado al guardar y cabecera fija con efecto cristal.
 
 ## Estructura del proyecto
@@ -195,6 +201,7 @@ js/vista-registro.js    asistente de registro (importe → categoría) + modal d
 js/teclado.js           teclado numérico reutilizado por el registro y la edición
 js/vista-resumen.js     selector de mes, totales, presupuestos, gráfico, lista
 js/vista-informe.js     informe del mes dentro de la web (claves, calendario, categorías, top)
+js/ano.js               "Tu año en gastos" (resumen anual en pantallas)
 js/copia.js             copia de seguridad: descargar y restaurar el .json
 js/disponible.js        "Disponible hoy" de la pantalla principal
 js/graficos.js          donut SVG dibujado a mano, con animación de entrada

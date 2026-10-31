@@ -25,6 +25,27 @@ export function mostrarToast(mensaje, { duracion = 2600, accion } = {}) {
   timeoutId = setTimeout(ocultarToast, duracion);
 }
 
+// Toque háptico. Android: navigator.vibrate. iPhone: Safari no tiene vibración, pero desde iOS 18
+// conmutar un <input type="checkbox" switch> produce el toque del sistema (mismo truco que la
+// librería ios-haptics). Solo funciona dentro del gesto del usuario: hay que llamarlo en el
+// manejador del toque, antes de cualquier await.
+export function vibrar() {
+  if (typeof navigator.vibrate === "function") {
+    navigator.vibrate(10);
+    return;
+  }
+  const label = document.createElement("label");
+  label.setAttribute("aria-hidden", "true");
+  label.style.display = "none";
+  const input = document.createElement("input");
+  input.type = "checkbox";
+  input.setAttribute("switch", "");
+  label.appendChild(input);
+  document.head.appendChild(label);
+  label.click();
+  label.remove();
+}
+
 // Check animado en el centro de la pantalla tras guardar un gasto (no bloquea los toques).
 let timeoutGuardado = null;
 export function mostrarGuardado(texto) {

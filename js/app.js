@@ -4,8 +4,10 @@ import {
   initVistaResumen,
   refrescar as refrescarResumen,
   abrirModalPresupuestos,
+  datosInforme,
   datosInformeListos,
 } from "./vista-resumen.js";
+import { initAno, abrirAno } from "./ano.js";
 import { initVistaInforme, mostrarInforme } from "./vista-informe.js";
 import { initCopia } from "./copia.js";
 import { initDisponible, actualizarDisponible } from "./disponible.js";
@@ -46,6 +48,7 @@ document.getElementById("btn-ver-informe").addEventListener("click", async () =>
   mostrarVista("informe");
   mostrarInforme(await datosInformeListos());
 });
+document.getElementById("btn-ano").addEventListener("click", () => abrirAno(datosInforme().mesDate.getFullYear()));
 document.getElementById("btn-cerrar-informe").addEventListener("click", () => mostrarVista("resumen"));
 document.addEventListener("gasto-guardado", actualizarDisponible);
 document.addEventListener("datos-restaurados", actualizarDisponible);
@@ -57,6 +60,7 @@ if (!estaConfigurado()) {
 initVistaRegistro();
 initVistaResumen();
 initVistaInforme();
+initAno();
 initCopia();
 initDisponible({
   onPedirPresupuesto: async () => {
