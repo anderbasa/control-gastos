@@ -17,6 +17,10 @@
   --sombra-modal: 0 -8px 40px rgba(20, 21, 26, 0.18);
   --fuente: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --fuente-num: "Space Grotesk", "Plus Jakarta Sans", -apple-system, sans-serif;
+  /* Márgenes del notch/hora y de la barra inferior del iPhone. Solo valen algo en la app
+     de pantalla de inicio (barra translúcida); en Safari normal son 0. */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
   color-scheme: light;
 }
 
@@ -52,12 +56,45 @@ body {
   height: 100%;
   overscroll-behavior-y: contain;
   -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  padding-top: var(--safe-top);
+}
+
+/* Franja de color bajo la hora: con la barra translúcida, iOS escribe la hora en blanco,
+   así que sobre el fondo claro no se vería. */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--safe-top);
+  background: var(--acento);
+  z-index: 60;
+  pointer-events: none;
+}
+
+button {
+  touch-action: manipulation;
+}
+
+.tecla,
+.chip-categoria,
+.chip-mini,
+.tendencia-col {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 #app {
   max-width: 480px;
   margin: 0 auto;
-  min-height: 100vh;
+  min-height: calc(100vh - var(--safe-top));
+  padding-bottom: var(--safe-bottom);
   display: flex;
   flex-direction: column;
 }
@@ -162,6 +199,12 @@ body {
   flex-direction: column;
   gap: 14px;
   justify-content: center;
+}
+
+/* .btn-guardar lleva flex: 1 para ocupar el ancho en las filas de botones; en esta columna
+   haría que el botón se estirase en vertical. */
+.paso-importe .btn-guardar {
+  flex: none;
 }
 
 .paso-importe .importe-display {
@@ -276,13 +319,13 @@ body {
   max-width: 480px;
   margin: 0 auto;
   border-radius: 28px 28px 0 0;
-  padding: 20px 20px calc(20px + env(safe-area-inset-bottom));
+  padding: 20px 20px calc(20px + var(--safe-bottom));
+  max-height: calc(94vh - var(--safe-top));
   display: flex;
   flex-direction: column;
   gap: 14px;
   box-shadow: var(--sombra-modal);
   animation: subirModal 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  max-height: 94vh;
   overflow-y: auto;
 }
 
@@ -1124,7 +1167,7 @@ body {
 
 .toast {
   position: fixed;
-  bottom: 24px;
+  bottom: calc(24px + var(--safe-bottom));
   left: 50%;
   transform: translateX(-50%);
   background: var(--texto);

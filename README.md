@@ -126,6 +126,12 @@ navegador — si no, abrir la URL normal funciona igual de bien.
 
 - **Registro rápido**: categoría + importe con teclado numérico propio, nota y
   fecha opcionales, en menos de 5 segundos.
+- **App en el iPhone**: en Safari, Compartir → "Añadir a pantalla de inicio" la
+  instala como una app (pantalla completa, icono propio, franja de color bajo la
+  hora). Sigue funcionando también desde la pegatina NFC (que abre Safari); los
+  gastos son los mismos porque están en Firestore. El Excel y la copia de seguridad
+  se guardan con el menú Compartir (Archivos, Drive, correo…), y la app carga
+  siempre la última versión cuando hay conexión.
 - **Categorías**: Comida, Transporte, Ocio, Compras, Facturas/Suscripciones,
   Salud, Viajes y Otros.
 - **Resumen mensual**: total, media diaria, comparación con el mes anterior,

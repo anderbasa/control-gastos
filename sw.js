@@ -1,4 +1,4 @@
-const CACHE = "gastos-v9";
+const CACHE = "gastos-v10";
 const ARCHIVOS = [
   "./",
   "./index.html",
@@ -15,6 +15,8 @@ const ARCHIVOS = [
   "./js/vista-registro.js",
   "./js/vista-resumen.js",
   "./manifest.json",
+  "./icons/apple-touch-icon.png",
+  "./icons/icon-192.png",
 ];
 
 self.addEventListener("install", (e) => {
@@ -29,14 +31,20 @@ self.addEventListener("activate", (e) => {
   self.clients.claim();
 });
 
+// Primero la red (para que la app de pantalla de inicio coja siempre la última versión) y, si no
+// hay conexión, la copia guardada. Solo los archivos propios: Firebase, fuentes y ExcelJS van directos.
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
-  const url = new URL(e.request.url);
-  // Firestore/Firebase: siempre red, nunca cache
-  if (url.hostname.includes("firestore") || url.hostname.includes("googleapis") || url.hostname.includes("gstatic")) {
-    return;
-  }
+  if (new URL(e.request.url).origin !== self.location.origin) return;
   e.respondWith(
-    caches.match(e.request).then((cached) => cached || fetch(e.request, { cache: "no-store" }))
+    fetch(e.request, { cache: "no-store" })
+      .then((resp) => {
+        if (resp.ok) {
+          const copia = resp.clone();
+          caches.open(CACHE).then((c) => c.put(e.request, copia));
+        }
+        return resp;
+      })
+      .catch(() => caches.match(e.request, { ignoreSearch: true }))
   );
 });

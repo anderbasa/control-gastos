@@ -1,4 +1,5 @@
 import { getCategoria, CATEGORIAS } from "./config.js";
+import { guardarArchivo } from "./ui.js";
 import { donutConLeyendaPNG, barrasPorDiaPNG } from "./graficos-informe.js";
 
 const COLOR_ENCABEZADO = "FF5B5FEF";
@@ -166,12 +167,5 @@ export async function exportarExcel({ gastos, nombreMes, mesId, stats = {} }) {
   const blob = new Blob([buffer], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `gastos-${mesId}.xlsx`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  await guardarArchivo(blob, `gastos-${mesId}.xlsx`);
 }

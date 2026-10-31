@@ -12,6 +12,32 @@ export function mostrarToast(mensaje, duracion = 2600) {
   }, duracion);
 }
 
+// Entrega un archivo al usuario. Si el navegador puede compartir archivos (iPhone, Android) abre el
+// menú Compartir ("Guardar en Archivos", Drive, correo...), que en la app de pantalla de inicio de
+// iOS funciona mejor que una descarga. Si no, descarga normal. Devuelve false solo si el usuario
+// cancela el menú Compartir.
+export async function guardarArchivo(blob, nombre) {
+  const archivo = new File([blob], nombre, { type: blob.type });
+  if (navigator.canShare?.({ files: [archivo] })) {
+    try {
+      await navigator.share({ files: [archivo], title: nombre });
+      return true;
+    } catch (err) {
+      if (err.name === "AbortError") return false;
+      // Cualquier otro fallo (p. ej. el gesto ha caducado tras esperar a los datos): descarga normal.
+    }
+  }
+  const url = URL.createObjectURL(archivo);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = nombre;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+  return true;
+}
+
 export function escaparHtml(texto) {
   return String(texto).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 }

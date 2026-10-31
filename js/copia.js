@@ -1,5 +1,5 @@
 import { todosLosGastos, getPresupuestos, importarGastos, guardarPresupuestos } from "./firebase.js";
-import { mostrarToast } from "./ui.js";
+import { mostrarToast, guardarArchivo } from "./ui.js";
 
 const VERSION_COPIA = 1;
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -96,18 +96,6 @@ function posponerAviso() {
   evaluarAviso();
 }
 
-function descargarArchivo(nombre, texto) {
-  const blob = new Blob([texto], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = nombre;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-}
-
 async function onDescargar() {
   $btnDescargar.disabled = true;
   $btnAvisoCopia.disabled = true;
@@ -128,11 +116,14 @@ async function onDescargar() {
     };
     const hoy = new Date();
     const dia = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}-${String(hoy.getDate()).padStart(2, "0")}`;
-    descargarArchivo(`control-gastos-copia-${dia}.json`, JSON.stringify(copia, null, 2));
+    const blob = new Blob([JSON.stringify(copia, null, 2)], { type: "application/json" });
+    const entregada = await guardarArchivo(blob, `control-gastos-copia-${dia}.json`);
+    // Si se cierra el menú Compartir sin guardar, la copia no cuenta como hecha.
+    if (!entregada) return;
     guardarLocal(CLAVE_ULTIMA_COPIA, new Date().toISOString());
     pintarUltimaCopia();
     evaluarAviso();
-    mostrarToast(`Copia descargada (${plural(gastos.length, "gasto", "gastos")})`);
+    mostrarToast(`Copia guardada (${plural(gastos.length, "gasto", "gastos")})`);
   } catch (err) {
     console.error(err);
     mostrarToast("No se pudo crear la copia: " + err.message);
