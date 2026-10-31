@@ -3,7 +3,6 @@ import { gastosEntre, getPresupuestos, guardarPresupuestos } from "./firebase.js
 import { donutSVG, animarDonut } from "./graficos.js";
 import { formatoEuros, mostrarToast, svgIcono, animarNumero, escaparHtml } from "./ui.js";
 import { abrirModal } from "./vista-registro.js";
-import { exportarExcel } from "./excel.js";
 
 const $selectorMes = document.getElementById("selector-mes");
 const $totalMes = document.getElementById("total-mes");
@@ -18,7 +17,6 @@ const $presupuestoTotalRelleno = document.getElementById("presupuesto-total-rell
 const $presupuestoTotalTexto = document.getElementById("presupuesto-total-texto");
 
 const $btnPresupuestos = document.getElementById("btn-presupuestos");
-const $btnExportarExcel = document.getElementById("btn-exportar-excel");
 const $modalPresupuestos = document.getElementById("modal-presupuestos");
 const $btnCerrarPresupuestos = document.getElementById("btn-cerrar-presupuestos");
 const $listaPresupuestos = document.getElementById("lista-presupuestos");
@@ -68,7 +66,6 @@ export function initVistaResumen() {
   $btnPresupuestos.addEventListener("click", abrirModalPresupuestos);
   $btnCerrarPresupuestos.addEventListener("click", cerrarModalPresupuestos);
   $btnGuardarPresupuestos.addEventListener("click", onGuardarPresupuestos);
-  $btnExportarExcel.addEventListener("click", onExportarExcel);
 
   CATEGORIAS.forEach((c) => {
     $filtroCategoria.insertAdjacentHTML("beforeend", `<option value="${c.id}">${c.nombre}</option>`);
@@ -105,7 +102,7 @@ export function rangoComparable(mesDate, hoy = new Date()) {
   return { enCurso: true, diaLimite, etiqueta: `${tramo} ${nombreMesAnterior}` };
 }
 
-export async function refrescar() {
+async function cargar() {
   const mesDate = parseMes($selectorMes.value || mesActualISO());
   const mesSiguiente = new Date(mesDate.getFullYear(), mesDate.getMonth() + 1, 1);
   const inicioVentana = new Date(mesDate.getFullYear(), mesDate.getMonth() - (MESES_TENDENCIA - 1), 1);
@@ -461,22 +458,30 @@ async function onGuardarPresupuestos() {
   }
 }
 
-async function onExportarExcel() {
-  if (!gastosActuales.length) {
-    mostrarToast("No hay gastos que exportar este mes");
-    return;
-  }
+// Lo que ya está calculado del mes visible, para el informe (js/vista-informe.js).
+export function datosInforme() {
   const mesId = $selectorMes.value || mesActualISO();
-  const nombreMes = parseMes(mesId).toLocaleDateString("es-ES", { month: "long", year: "numeric" });
-  $btnExportarExcel.disabled = true;
-  $btnExportarExcel.querySelector("span").textContent = "Generando...";
-  try {
-    await exportarExcel({ gastos: gastosActuales, nombreMes, mesId, stats: statsActuales });
-  } catch (err) {
-    console.error(err);
-    mostrarToast("Error al exportar: " + err.message);
-  } finally {
-    $btnExportarExcel.disabled = false;
-    $btnExportarExcel.querySelector("span").textContent = "Exportar a Excel";
-  }
+  return {
+    gastos: gastosActuales,
+    mesId,
+    mesDate: parseMes(mesId),
+    nombreMes: parseMes(mesId).toLocaleDateString("es-ES", { month: "long", year: "numeric" }),
+    stats: statsActuales,
+    totalesAnteriores,
+    etiquetaComparacion,
+  };
+}
+
+// Cada recarga del resumen queda guardada para que el informe pueda esperar a que termine
+// (si no, al cambiar de mes y abrir el informe enseguida saldrían los datos del mes anterior).
+let ultimaCarga = Promise.resolve();
+
+export function refrescar() {
+  ultimaCarga = cargar();
+  return ultimaCarga;
+}
+
+export async function datosInformeListos() {
+  await ultimaCarga;
+  return datosInforme();
 }

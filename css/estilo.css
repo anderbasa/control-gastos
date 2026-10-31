@@ -1211,6 +1211,352 @@ button {
   max-width: calc(100vw - 32px);
 }
 
+/* ---------- Informe del mes ---------- */
+.informe-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.informe-sub {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--texto-suave);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.informe-titulo {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.informe-titulo::first-letter {
+  text-transform: uppercase;
+}
+
+.informe-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 22px 20px 18px;
+  margin-bottom: 14px;
+  border-radius: 24px;
+  background: var(--degradado-app);
+  color: #fff;
+  box-shadow: 0 12px 30px rgba(91, 95, 239, 0.32);
+}
+
+.informe-hero-etiqueta {
+  font-size: 13px;
+  font-weight: 700;
+  opacity: 0.8;
+}
+
+.informe-hero-total {
+  font-family: var(--fuente-num);
+  font-size: clamp(40px, 12vw, 52px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.informe-hero-comparacion {
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.informe-hero-cifras {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.informe-hero-cifras span {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.informe-tarjeta {
+  padding: 16px;
+  margin-bottom: 12px;
+  border-radius: 20px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+}
+
+.informe-tarjeta h3 {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.informe-ayuda {
+  margin: -4px 0 10px;
+  font-size: 12.5px;
+  color: var(--texto-suave);
+}
+
+.informe-claves {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.informe-claves li {
+  position: relative;
+  padding-left: 18px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.informe-claves li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--acento);
+}
+
+.calendario {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+.cal-cabecera {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--texto-suave);
+  padding-bottom: 2px;
+}
+
+.cal-dia {
+  aspect-ratio: 1;
+  border: none;
+  border-radius: 10px;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: var(--fuente-num);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cal-dia.con-gasto {
+  background: color-mix(in srgb, var(--acento) var(--pct), var(--fondo));
+}
+
+.cal-dia.fuerte {
+  color: #fff;
+}
+
+.cal-dia.futuro {
+  opacity: 0.35;
+}
+
+.cal-dia.hoy {
+  box-shadow: inset 0 0 0 1.5px var(--texto-suave);
+}
+
+.cal-dia.elegido {
+  box-shadow: 0 0 0 2px var(--superficie), 0 0 0 4px var(--acento);
+}
+
+.calendario-dia {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cal-dia-titulo {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.cal-dia-titulo span::first-letter {
+  text-transform: uppercase;
+}
+
+.cal-dia-titulo strong {
+  font-family: var(--fuente-num);
+  font-size: 15px;
+}
+
+.cal-gasto {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+}
+
+.cal-gasto .icono-badge {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cal-gasto-texto {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cal-gasto-importe {
+  font-family: var(--fuente-num);
+  font-weight: 700;
+}
+
+.inf-cat {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 10px 0;
+  border-top: 1px solid var(--borde);
+}
+
+.inf-cat:first-child {
+  border-top: none;
+  padding-top: 2px;
+}
+
+.inf-cat .icono-badge,
+.informe-top .icono-badge {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inf-cat-cuerpo {
+  flex: 1;
+  min-width: 0;
+}
+
+.inf-cat-fila {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.inf-cat-fila strong {
+  font-family: var(--fuente-num);
+}
+
+.inf-cat-barra {
+  height: 7px;
+  margin: 7px 0 5px;
+  border-radius: 4px;
+  background: var(--fondo);
+  overflow: hidden;
+}
+
+.inf-cat-barra span {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 4px;
+  background: var(--color-cat);
+  transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.inf-cat-meta {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--texto-suave);
+}
+
+.informe-top {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: puesto;
+}
+
+.informe-top li {
+  counter-increment: puesto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 0;
+  border-top: 1px solid var(--borde);
+}
+
+.informe-top li:first-child {
+  border-top: none;
+  padding-top: 2px;
+}
+
+.informe-top li::before {
+  content: counter(puesto);
+  width: 16px;
+  font-family: var(--fuente-num);
+  font-weight: 700;
+  color: var(--texto-suave);
+  text-align: center;
+}
+
+.inf-top-texto {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.inf-top-texto span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inf-top-texto small {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--texto-suave);
+}
+
+.informe-top strong {
+  font-family: var(--fuente-num);
+}
+
+.btn-informe-excel {
+  width: 100%;
+  margin: 6px 0 20px;
+}
+
 .guardado-ok {
   position: fixed;
   top: 50%;

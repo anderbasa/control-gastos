@@ -171,12 +171,11 @@
       <div class="resumen-grafico" id="grafico-container"></div>
       <div class="resumen-desglose" id="desglose-categorias"></div>
 
-      <button id="btn-exportar-excel" class="btn-exportar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="4" width="18" height="16" rx="2" />
-          <path d="M3 9h18M3 15h18M9 4v16M15 4v16" />
+      <button id="btn-ver-informe" class="btn-exportar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
         </svg>
-        <span>Exportar a Excel</span>
+        <span>Ver informe del mes</span>
       </button>
 
       <h2 class="lista-titulo">Movimientos</h2>
@@ -218,6 +217,55 @@
           </div>
         </div>
       </section>
+    </main>
+
+    <main id="vista-informe" class="vista oculto">
+      <div class="informe-header">
+        <button id="btn-cerrar-informe" class="icon-btn" aria-label="Volver al resumen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 5l-7 7 7 7" />
+          </svg>
+        </button>
+        <div>
+          <div class="informe-sub">Informe</div>
+          <h2 class="informe-titulo" id="informe-titulo"></h2>
+        </div>
+      </div>
+
+      <p class="vacio oculto" id="informe-vacio">No hay gastos este mes.</p>
+
+      <div id="informe-contenido">
+        <section class="informe-hero">
+          <span class="informe-hero-etiqueta">Has gastado</span>
+          <span class="informe-hero-total" id="informe-total"></span>
+          <span class="informe-hero-comparacion" id="informe-comparacion"></span>
+          <div class="informe-hero-cifras" id="informe-cifras"></div>
+        </section>
+
+        <section class="informe-tarjeta">
+          <h3>En pocas palabras</h3>
+          <ul class="informe-claves" id="informe-claves"></ul>
+        </section>
+
+        <section class="informe-tarjeta">
+          <h3>Tu mes, día a día</h3>
+          <p class="informe-ayuda">Cuanto más intenso el color, más gastaste. Toca un día para ver sus gastos.</p>
+          <div class="calendario" id="informe-calendario"></div>
+          <div class="calendario-dia" id="informe-dia"></div>
+        </section>
+
+        <section class="informe-tarjeta">
+          <h3>Por categoría</h3>
+          <div id="informe-categorias"></div>
+        </section>
+
+        <section class="informe-tarjeta">
+          <h3>Tus gastos más grandes</h3>
+          <ol class="informe-top" id="informe-top"></ol>
+        </section>
+
+        <button id="btn-informe-excel" class="btn-secundario btn-informe-excel">Descargar en Excel</button>
+      </div>
     </main>
   </div>
 

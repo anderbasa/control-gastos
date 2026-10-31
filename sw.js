@@ -1,4 +1,4 @@
-const CACHE = "gastos-v12";
+const CACHE = "gastos-v13";
 const ARCHIVOS = [
   "./",
   "./index.html",
@@ -15,6 +15,7 @@ const ARCHIVOS = [
   "./js/ui.js",
   "./js/vista-registro.js",
   "./js/vista-resumen.js",
+  "./js/vista-informe.js",
   "./manifest.json",
   "./icons/apple-touch-icon.png",
   "./icons/icon-192.png",

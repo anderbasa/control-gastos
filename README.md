@@ -173,14 +173,15 @@ navegador — si no, abrir la URL normal funciona igual de bien.
   Cada categoría con presupuesto muestra una barra de progreso (verde → ámbar
   a partir del 80% → rojo si te pasas), y si hay al menos un presupuesto
   definido aparece también una barra global bajo el total del mes.
-- **Exportar a Excel (informe completo)**: el botón "Exportar a Excel" del
-  resumen descarga un `.xlsx` con tres hojas — "Informe" (portada con el
-  total, la media diaria y la comparación con el mes anterior, más un donut
-  por categoría y un gráfico de barras del gasto día a día, ambos incrustados
-  como imágenes), "Gastos" (todos los movimientos, con cabecera de color,
-  importes en formato moneda, autofiltro, barras de datos nativas de Excel
-  y fila de total con fórmula) y "Resumen" (importe y % por categoría, también
-  con barras de datos).
+- **Informe del mes**: el botón "Ver informe del mes" del resumen abre, dentro de la
+  propia web, una cabecera con el total y la comparación, frases clave del mes (categoría
+  principal, día más caro, gasto más grande, días sin gastar, dónde más ha subido o
+  bajado), un calendario coloreado según lo gastado cada día (tocas un día y ves sus
+  gastos), una tabla por categoría con barras y los 5 gastos más grandes. Abajo,
+  "Descargar en Excel" genera el .xlsx de siempre (hojas Informe, Gastos y Resumen).
+- **Aspecto de iPhone**: iconos de categoría al estilo de la app Ajustes (colores del
+  sistema de iOS), logo de monedero con degradado, importes con la fuente redondeada
+  del iPhone, check animado al guardar y cabecera fija con efecto cristal.
 
 ## Estructura del proyecto
 
@@ -193,6 +194,7 @@ js/app.js               router entre vista registro / resumen
 js/vista-registro.js    asistente de registro (importe → categoría) + modal de edición
 js/teclado.js           teclado numérico reutilizado por el registro y la edición
 js/vista-resumen.js     selector de mes, totales, presupuestos, gráfico, lista
+js/vista-informe.js     informe del mes dentro de la web (claves, calendario, categorías, top)
 js/copia.js             copia de seguridad: descargar y restaurar el .json
 js/disponible.js        "Disponible hoy" de la pantalla principal
 js/graficos.js          donut SVG dibujado a mano, con animación de entrada

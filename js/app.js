@@ -1,24 +1,34 @@
 import { estaConfigurado } from "./firebase.js";
 import { initVistaRegistro } from "./vista-registro.js";
-import { initVistaResumen, refrescar as refrescarResumen, abrirModalPresupuestos } from "./vista-resumen.js";
+import {
+  initVistaResumen,
+  refrescar as refrescarResumen,
+  abrirModalPresupuestos,
+  datosInformeListos,
+} from "./vista-resumen.js";
+import { initVistaInforme, mostrarInforme } from "./vista-informe.js";
 import { initCopia } from "./copia.js";
 import { initDisponible, actualizarDisponible } from "./disponible.js";
 
-const $vistaRegistro = document.getElementById("vista-registro");
-const $vistaResumen = document.getElementById("vista-resumen");
-const $btnResumen = document.getElementById("btn-resumen");
-const $btnVolver = document.getElementById("btn-volver");
+const VISTAS = {
+  registro: document.getElementById("vista-registro"),
+  resumen: document.getElementById("vista-resumen"),
+  informe: document.getElementById("vista-informe"),
+};
 const $avisoConfig = document.getElementById("aviso-config");
 
+function mostrarVista(nombre) {
+  Object.entries(VISTAS).forEach(([clave, $vista]) => $vista.classList.toggle("oculto", clave !== nombre));
+  window.scrollTo(0, 0);
+}
+
 function mostrarResumen() {
-  $vistaRegistro.classList.add("oculto");
-  $vistaResumen.classList.remove("oculto");
+  mostrarVista("resumen");
   return refrescarResumen();
 }
 
 function mostrarRegistro() {
-  $vistaResumen.classList.add("oculto");
-  $vistaRegistro.classList.remove("oculto");
+  mostrarVista("registro");
   // En el resumen se pueden editar o borrar gastos y cambiar presupuestos.
   actualizarDisponible();
 }
@@ -30,8 +40,13 @@ window.addEventListener(
   { passive: true }
 );
 
-$btnResumen.addEventListener("click", mostrarResumen);
-$btnVolver.addEventListener("click", mostrarRegistro);
+document.getElementById("btn-resumen").addEventListener("click", mostrarResumen);
+document.getElementById("btn-volver").addEventListener("click", mostrarRegistro);
+document.getElementById("btn-ver-informe").addEventListener("click", async () => {
+  mostrarVista("informe");
+  mostrarInforme(await datosInformeListos());
+});
+document.getElementById("btn-cerrar-informe").addEventListener("click", () => mostrarVista("resumen"));
 document.addEventListener("gasto-guardado", actualizarDisponible);
 document.addEventListener("datos-restaurados", actualizarDisponible);
 
@@ -41,6 +56,7 @@ if (!estaConfigurado()) {
 
 initVistaRegistro();
 initVistaResumen();
+initVistaInforme();
 initCopia();
 initDisponible({
   onPedirPresupuesto: async () => {
