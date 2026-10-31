@@ -277,6 +277,14 @@
 
   <div id="toast" class="toast oculto"></div>
 
+  <div id="guardado-ok" class="guardado-ok oculto" aria-live="polite">
+    <svg viewBox="0 0 52 52" aria-hidden="true">
+      <circle class="guardado-circulo" cx="26" cy="26" r="23" />
+      <path class="guardado-check" d="M15 27l7.5 7.5L38 19" />
+    </svg>
+    <span id="guardado-ok-texto"></span>
+  </div>
+
   <script>
     window.addEventListener("error", (e) => {
       console.error(e.error || e.message);

@@ -1,6 +1,6 @@
 import { CATEGORIAS, getCategoria } from "./config.js";
 import { crearGasto, actualizarGasto, borrarGasto, importarGastos } from "./firebase.js";
-import { mostrarToast, svgIcono, formatoEuros } from "./ui.js";
+import { mostrarToast, mostrarGuardado, svgIcono, formatoEuros } from "./ui.js";
 import { crearTeclado, parseImporte } from "./teclado.js";
 
 // --- Elementos: paso 1 (importe) ---
@@ -145,7 +145,7 @@ async function onCategoriaElegida(categoriaId) {
   guardandoRapido = true;
   try {
     await crearGasto({ importe, categoria: categoriaId, nota, fecha });
-    mostrarToast("Gasto guardado");
+    mostrarGuardado(`${formatoEuros(importe)} · ${getCategoria(categoriaId).nombre}`);
     resetPasoImporte();
     document.dispatchEvent(new CustomEvent("gasto-guardado"));
   } catch (err) {
@@ -162,8 +162,7 @@ async function onCategoriaElegida(categoriaId) {
 function pintarCategoriaModal(categoriaId) {
   const cat = getCategoria(categoriaId);
   $modalIcono.innerHTML = svgIcono(cat.icono, 19);
-  $modalIcono.style.background = `color-mix(in srgb, ${cat.color} 16%, transparent)`;
-  $modalIcono.style.color = cat.color;
+  $modalIcono.style.setProperty("--color-cat", cat.color);
   $modalNombre.textContent = cat.nombre;
   $modalCategorias.querySelectorAll(".chip-mini").forEach((chip) => {
     const activo = chip.dataset.id === categoriaId;

@@ -29,14 +29,15 @@ const ICONOS = {
 // (y un icono en ICONOS de arriba; si se omite, se usa el de "otros").
 // "otros" debe ir siempre la última: getCategoria la usa como categoría por defecto.
 export const CATEGORIAS = [
-  { id: "comida", nombre: "Comida", color: "#E4572E" },
-  { id: "transporte", nombre: "Transporte", color: "#3B82C4" },
-  { id: "ocio", nombre: "Ocio", color: "#8E44AD" },
-  { id: "compras", nombre: "Compras", color: "#D4A017" },
-  { id: "facturas", nombre: "Facturas/Suscripciones", color: "#546E7A" },
-  { id: "salud", nombre: "Salud", color: "#2E9E6D" },
-  { id: "viajes", nombre: "Viajes", color: "#D6407F" },
-  { id: "otros", nombre: "Otros", color: "#8D8D8D" },
+  // Colores del sistema de iOS (los de la app Ajustes): llevan bien el icono en blanco encima.
+  { id: "comida", nombre: "Comida", color: "#FF9500" },
+  { id: "transporte", nombre: "Transporte", color: "#007AFF" },
+  { id: "ocio", nombre: "Ocio", color: "#AF52DE" },
+  { id: "compras", nombre: "Compras", color: "#FF2D55" },
+  { id: "facturas", nombre: "Facturas/Suscripciones", color: "#5856D6" },
+  { id: "salud", nombre: "Salud", color: "#34C759" },
+  { id: "viajes", nombre: "Viajes", color: "#32ADE6" },
+  { id: "otros", nombre: "Otros", color: "#8E8E93" },
 ].map((c) => ({ ...c, icono: ICONOS[c.id] || ICONOS.otros }));
 
 export function getCategoria(id) {

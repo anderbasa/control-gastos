@@ -23,6 +23,13 @@ function mostrarRegistro() {
   actualizarDisponible();
 }
 
+const $topbar = document.querySelector(".topbar");
+window.addEventListener(
+  "scroll",
+  () => $topbar.classList.toggle("con-scroll", window.scrollY > 4),
+  { passive: true }
+);
+
 $btnResumen.addEventListener("click", mostrarResumen);
 $btnVolver.addEventListener("click", mostrarRegistro);
 document.addEventListener("gasto-guardado", actualizarDisponible);

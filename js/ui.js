@@ -25,6 +25,23 @@ export function mostrarToast(mensaje, { duracion = 2600, accion } = {}) {
   timeoutId = setTimeout(ocultarToast, duracion);
 }
 
+// Check animado en el centro de la pantalla tras guardar un gasto (no bloquea los toques).
+let timeoutGuardado = null;
+export function mostrarGuardado(texto) {
+  const $ok = document.getElementById("guardado-ok");
+  document.getElementById("guardado-ok-texto").textContent = texto;
+  clearTimeout(timeoutGuardado);
+  // Volver a empezar las animaciones aunque el aviso anterior siga visible.
+  $ok.classList.add("oculto");
+  $ok.classList.remove("saliendo");
+  void $ok.offsetWidth;
+  $ok.classList.remove("oculto");
+  timeoutGuardado = setTimeout(() => {
+    $ok.classList.add("saliendo");
+    timeoutGuardado = setTimeout(() => $ok.classList.add("oculto"), 220);
+  }, 1100);
+}
+
 function ocultarToast() {
   const $toast = document.getElementById("toast");
   clearTimeout(timeoutId);
